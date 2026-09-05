@@ -378,7 +378,10 @@
       const s = st();
       if (!a || !s) return;
       wrapMovement();
-      if (s.play || s.screen === "play") {
+      if (s.play && !window.__laPlayAt) window.__laPlayAt = now;
+      if (!s.play) window.__laPlayAt = 0;
+      const readyOut = !!(s.play && s.outside);
+      if (readyOut) {
         if (!ltvDone) dressLtv();
         if (!dockG) buildDock();
       }

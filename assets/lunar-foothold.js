@@ -1296,7 +1296,10 @@
       lastT = now;
       const a = api();
       const s = st();
-      if (!root && a && s && (s.play || s.outside || s.screen === "play")) buildWorld();
+      if (s && s.play && !window.__laPlayAt) window.__laPlayAt = now;
+      if (s && !s.play) window.__laPlayAt = 0;
+      const readyOut = !!(s && s.play && s.outside);
+      if (!root && a && s && readyOut) buildWorld();
       if (s && a) {
         tickJobPri(dt, s);
         tickScout(dt, s, a);
