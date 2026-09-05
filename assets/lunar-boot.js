@@ -1,6 +1,7 @@
 /**
  * Lunar Ascent — input bootstrap.
  * Title buttons + WASD. Does not steal Optimus / LEMS E.
+ * After Start, keep the 3D view presenting (no per-frame camera stomp).
  */
 (function lunarBoot() {
   if (window.__laBoot) return;
@@ -8,9 +9,11 @@
 
   const OPT = 2.55;
   const LEMS = { x: 13, z: -24 };
+  const SPAWN = { x: 2.72, z: 0.15, yaw: 1.2 };
   const held = Object.create(null);
   let lastStartAt = 0;
   let spawnFix = 0;
+  let placedLook = false;
 
   function store() {
     return window.__laStore || (window.__controlsTest && window.__controlsTest.store) || null;
@@ -59,6 +62,51 @@
     return ((el && (el.innerText || el.textContent)) || "").replace(/\s+/g, " ").trim();
   }
 
+  function kickGL() {
+    try {
+      const c = document.querySelector("canvas");
+      if (!c) return;
+      const r3f = c.__r3f;
+      const root = r3f && (r3f.root || r3f);
+      const getState = root && root.getState;
+      const state = typeof getState === "function" ? getState() : r3f;
+      if (state && typeof state.invalidate === "function") state.invalidate();
+      const gl = state && state.gl;
+      if (gl && gl.domElement) {
+        gl.domElement.style.display = "block";
+        gl.domElement.style.visibility = "visible";
+        gl.domElement.style.opacity = "1";
+      }
+    } catch {}
+  }
+
+  function placeSpawn(Y, t, withLook) {
+    try {
+      Y.setState({
+        outside: false,
+        suited: false,
+        px: SPAWN.x,
+        pz: SPAWN.z,
+        heading: SPAWN.yaw,
+        airlock: "idle",
+        lockT: 0,
+        donning: 0,
+        seated: false,
+        vehicle: "walk",
+        paused: false,
+        cine: -1,
+        screen: "play",
+      });
+    } catch {}
+    try {
+      if (t && t.setPos) t.setPos(SPAWN.x, SPAWN.z);
+      if (withLook && t && t.setLook && !placedLook) {
+        t.setLook(SPAWN.yaw, -0.05);
+        placedLook = true;
+      }
+    } catch {}
+  }
+
   function startPlay(fresh) {
     const now = performance.now();
     if (now - lastStartAt < 350) return;
@@ -91,7 +139,10 @@
         vehicle: "walk",
       });
     } catch {}
-    spawnFix = 18;
+    spawnFix = fresh || !has ? 10 : 0;
+    placedLook = false;
+    if (spawnFix > 0) placeSpawn(Y, window.__controlsTest, true);
+    kickGL();
     try {
       window.focus();
     } catch {}
@@ -109,6 +160,7 @@
       if (Y && Y.getState && Y.getState().startCine) Y.getState().startCine(true);
       if (Y) Y.setState({ screen: "intro", cine: 0, play: true, paused: false, cineFresh: true });
     } catch {}
+    kickGL();
   }
 
   function openSettings() {
@@ -250,6 +302,7 @@
       if (!s) return;
       if (s.play && s.screen === "play" && spawnFix > 0) {
         spawnFix--;
+        kickGL();
         if (s.airlock !== "idle" || s.donning > 0 || s.seated || s.paused || (s.cine | 0) >= 0) {
           Y.setState({
             airlock: "idle",
@@ -264,23 +317,10 @@
         }
         const has = s.found && s.found.length;
         if (!has) {
-          const need = s.outside || Math.hypot(s.px || 0, s.pz || 0) < 1.05 || Math.abs((s.pz || 0) + 1.48) < 0.05;
-          if (need || spawnFix > 12) {
-            Y.setState({
-              outside: false,
-              suited: false,
-              px: 2.72,
-              pz: 0.15,
-              heading: 1.2,
-              airlock: "idle",
-              lockT: 0,
-              donning: 0,
-              seated: false,
-              vehicle: "walk",
-            });
-            if (t && t.setPos) t.setPos(2.72, 0.15);
-            if (t && t.setLook) t.setLook(1.2, -0.05);
-          }
+          const at =
+            !s.outside && dist(s.px, s.pz, SPAWN.x, SPAWN.z) < 0.55;
+          if (!at) placeSpawn(Y, t, false);
+          else spawnFix = 0;
         }
       }
       if (!s.play || s.paused || s.screen === "home" || s.screen === "settings") return;
@@ -326,7 +366,8 @@
 
   const css = document.createElement("style");
   css.textContent =
-    "button.title-menu,[role=button].title-menu{position:relative;z-index:2147483647;pointer-events:auto!important;touch-action:manipulation;cursor:pointer}";
+    "button.title-menu,[role=button].title-menu{position:relative;z-index:2147483647;pointer-events:auto!important;touch-action:manipulation;cursor:pointer}" +
+    "canvas{display:block!important;visibility:visible!important;opacity:1!important}";
   document.documentElement.appendChild(css);
   try {
     window.focus();
