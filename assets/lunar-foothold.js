@@ -1298,7 +1298,6 @@
       const s = st();
       if (!root && a && s && (s.play || s.outside || s.screen === "play")) buildWorld();
       if (s && a) {
-        if (s.dest) patch({ dest: null, navTape: false });
         tickJobPri(dt, s);
         tickScout(dt, s, a);
         tickMd(s);

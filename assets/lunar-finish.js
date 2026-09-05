@@ -158,34 +158,6 @@
         return orig(x, z);
       };
     }
-    const Y = a.store;
-    if (Y && typeof Y.setState === "function" && !Y.__laFinish) {
-      const origSet = Y.setState.bind(Y);
-      Y.setState = function (partial, replace) {
-        if (partial && typeof partial === "object" && !Array.isArray(partial)) {
-          const cur = Y.getState();
-          if (typeof partial.px === "number" && typeof partial.pz === "number" && cur.outside && cur.vehicle === "walk") {
-            const P = extraBlock(partial.px, partial.pz);
-            partial = Object.assign({}, partial, { px: P.x, pz: P.z });
-          }
-          if (partial.job && cur) {
-            const rumor = /ice is still a rumor|slope is still a rumor|bag hasn't reached|hopper still hasn't|rails still haven't/.test(partial.job);
-            const locked = (cur.jobPri | 0) >= 7 && /ear pushed|crater ice is in the tanks|die stamped|glaze cut|lights are on/.test(cur.job || "");
-            if (rumor && (foundHas(cur, "ice-pour") || foundHas(cur, "ice-bag"))) {
-              const keep = Object.assign({}, partial);
-              delete keep.job; delete keep.why;
-              partial = keep;
-            } else if (locked && rumor) {
-              const keep = Object.assign({}, partial);
-              delete keep.job; delete keep.why;
-              partial = keep;
-            }
-          }
-        }
-        return origSet(partial, replace);
-      };
-      Y.__laFinish = true;
-    }
     wrapped = true;
   }
 
