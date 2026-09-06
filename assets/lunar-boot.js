@@ -383,6 +383,22 @@
         const r = Math.hypot(s.px || 0, s.pz || 0);
         if (r < 5.5) keepHatchOpen(6000);
       }
+      if (s.outside && nearSouthHatch(s) && t) {
+        const r = Math.hypot(s.px || 0, s.pz || 0);
+        if (!window.__laFacedOut && t.setLook) {
+          window.__laFacedOut = true;
+          t.setLook(0, -0.05);
+          try {
+            const Y = store();
+            if (Y) Y.setState({ heading: 0 });
+          } catch (err) {}
+        }
+        if (held.KeyW && r < 7 && t.setPos) {
+          t.setPos(s.px || 0, (s.pz || 0) - 0.05);
+        }
+      } else if (!s.outside) {
+        window.__laFacedOut = false;
+      }
       const want = held.KeyW || held.KeyS || held.KeyA || held.KeyD;
       if (want) syncKeys();
     } catch {}
