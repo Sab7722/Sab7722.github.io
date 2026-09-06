@@ -374,6 +374,15 @@
         const r = Math.hypot(s.px || 0, s.pz || 0);
         if (r < 5.5) keepHatchOpen(6000);
       }
+      const hatchLive =
+        (s.airlock && s.airlock !== "idle") ||
+        (typeof window.__laHatchOpen === "number" && performance.now() < window.__laHatchOpen);
+      if (hatchLive && nearSouthHatch(s) && t && t.setPos) {
+        const px = s.px || 0;
+        const pz = s.pz || 0;
+        if (held.KeyW) t.setPos(px * 0.82, pz - 0.035);
+        else if (held.KeyS) t.setPos(px * 0.82, pz + 0.035);
+      }
       const want = held.KeyW || held.KeyS || held.KeyA || held.KeyD;
       if (want) syncKeys();
     } catch {}
