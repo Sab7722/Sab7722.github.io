@@ -189,7 +189,7 @@
     return hit;
   }
   function dressLtv() {
-    if (ltvDone || !stealTHREE()) return false;
+    return false;
     const g = findLtvGroup();
     if (!g) return false;
     ltvG = g;
@@ -273,7 +273,7 @@
 
   /* ---------- scout charge dock + MD abort + coupling ---------- */
   function buildDock() {
-    if (dockG || !stealTHREE()) return;
+    return;
     dockG = new Group();
     dockG.name = "la-scout-dock";
     dockG.position.set(PAD.x + 3.4, 0, PAD.z - 1.6);

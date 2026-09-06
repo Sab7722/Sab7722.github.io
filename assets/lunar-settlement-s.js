@@ -297,7 +297,7 @@
     if (C.__laIsStd === false) return false;
     try {
       const m = new C({ color: 0xffffff });
-      const ok = !!(m && m.isMeshStandardMaterial && !m.isMeshBasicMaterial && typeof m.roughness === "number");
+      const ok = !!(m && m.type === "MeshStandardMaterial");
       if (m && typeof m.dispose === "function") m.dispose();
       C.__laIsStd = ok;
       return ok;
@@ -332,7 +332,7 @@
             if (typ.indexOf("Cylinder") >= 0) CylinderGeometry = CylinderGeometry || o.geometry.constructor;
             if (typ.indexOf("Sphere") >= 0) SphereGeometry = SphereGeometry || o.geometry.constructor;
             const mat0 = Array.isArray(o.material) ? o.material[0] : o.material;
-            if (mat0 && mat0.isMeshStandardMaterial) MeshStandardMaterial = MeshStandardMaterial || mat0.constructor;
+            if (mat0 && mat0.type === "MeshStandardMaterial") MeshStandardMaterial = MeshStandardMaterial || mat0.constructor;
           }
         });
       } catch {}
@@ -343,10 +343,16 @@
   }
   function mat(color, extraM) {
     const m = new MeshStandardMaterial({ color: color });
-    if (m && m.isMeshStandardMaterial && !m.isMeshBasicMaterial && typeof m.roughness === "number") {
-      m.roughness = 0.78;
-      m.metalness = 0.22;
-      if (extraM && typeof m.setValues === "function") m.setValues(extraM);
+    if (!m || m.type !== "MeshStandardMaterial") return m;
+    m.roughness = 0.78;
+    m.metalness = 0.22;
+    if (extraM) {
+      if (extraM.transparent != null) m.transparent = extraM.transparent;
+      if (extraM.opacity != null) m.opacity = extraM.opacity;
+      if (typeof extraM.roughness === "number") m.roughness = extraM.roughness;
+      if (typeof extraM.metalness === "number") m.metalness = extraM.metalness;
+      if (typeof extraM.emissiveIntensity === "number") m.emissiveIntensity = extraM.emissiveIntensity;
+      if (extraM.emissive != null && m.emissive && typeof m.emissive.setHex === "function") m.emissive.setHex(extraM.emissive);
     }
     return m;
   }
@@ -416,7 +422,7 @@
   }
 
   function buildWorld() {
-    if (root || !stealTHREE()) return false;
+    return false;
     root = new Group();
     root.name = "la-settle";
     scene.add(root);

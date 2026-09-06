@@ -220,7 +220,7 @@
   }
 
   function buildWorld() {
-    if (root || !stealTHREE()) return false;
+    return false;
     root = new Group();
     root.name = "la-foothold";
     scene.add(root);

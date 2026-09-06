@@ -422,7 +422,7 @@
   }
 
   function buildWorld() {
-    if (root || !stealTHREE()) return false;
+    return false;
     root = new Group();
     root.name = "la-settle";
     scene.add(root);

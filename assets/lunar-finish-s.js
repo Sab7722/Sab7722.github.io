@@ -56,7 +56,7 @@
     if (C.__laIsStd === false) return false;
     try {
       const m = new C({ color: 0xffffff });
-      const ok = !!(m && m.isMeshStandardMaterial && !m.isMeshBasicMaterial && typeof m.roughness === "number");
+      const ok = !!(m && m.type === "MeshStandardMaterial");
       if (m && typeof m.dispose === "function") m.dispose();
       C.__laIsStd = ok;
       return ok;
@@ -88,7 +88,7 @@
             if (typ.indexOf("Cylinder") >= 0) CylinderGeometry = CylinderGeometry || o.geometry.constructor;
             if (typ.indexOf("Sphere") >= 0) SphereGeometry = SphereGeometry || o.geometry.constructor;
             const mat0 = Array.isArray(o.material) ? o.material[0] : o.material;
-            if (mat0 && mat0.isMeshStandardMaterial) MeshStandardMaterial = MeshStandardMaterial || mat0.constructor;
+            if (mat0 && mat0.type === "MeshStandardMaterial") MeshStandardMaterial = MeshStandardMaterial || mat0.constructor;
           }
         });
       } catch {}
@@ -99,10 +99,16 @@
   }
   function mat(color, extra) {
     const m = new MeshStandardMaterial({ color: color });
-    if (m && m.isMeshStandardMaterial && !m.isMeshBasicMaterial && typeof m.roughness === "number") {
-      m.roughness = 0.72;
-      m.metalness = 0.28;
-      if (extra && typeof m.setValues === "function") m.setValues(extra);
+    if (!m || m.type !== "MeshStandardMaterial") return m;
+    m.roughness = 0.72;
+    m.metalness = 0.28;
+    if (extra) {
+      if (extra.transparent != null) m.transparent = extra.transparent;
+      if (extra.opacity != null) m.opacity = extra.opacity;
+      if (typeof extra.roughness === "number") m.roughness = extra.roughness;
+      if (typeof extra.metalness === "number") m.metalness = extra.metalness;
+      if (typeof extra.emissiveIntensity === "number") m.emissiveIntensity = extra.emissiveIntensity;
+      if (extra.emissive != null && m.emissive && typeof m.emissive.setHex === "function") m.emissive.setHex(extra.emissive);
     }
     return m;
   }
@@ -183,7 +189,7 @@
     return hit;
   }
   function dressLtv() {
-    if (ltvDone || !stealTHREE()) return false;
+    return false;
     const g = findLtvGroup();
     if (!g) return false;
     ltvG = g;
@@ -267,7 +273,7 @@
 
   /* ---------- scout charge dock + MD abort + coupling ---------- */
   function buildDock() {
-    if (dockG || !stealTHREE()) return;
+    return;
     dockG = new Group();
     dockG.name = "la-scout-dock";
     dockG.position.set(PAD.x + 3.4, 0, PAD.z - 1.6);
