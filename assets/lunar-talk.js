@@ -1,6 +1,6 @@
 /**
- * Lunar Ascent — Hale & Rook actually answer the radio.
- * Diagnoses airlock, suit, power, hatch. Does not steal Optimus E.
+ * Lunar Ascent — walk-up radio. One crew answers what you asked.
+ * No unsolicited chatter. Does not steal Optimus E.
  */
 (function lunarTalk() {
   if (window.__laTalk) return;
@@ -14,148 +14,142 @@
     return Y && Y.getState ? Y.getState() : null;
   }
 
-  function lockWhy(s) {
+  function whoOf(q) {
+    if (/\bhale\b/.test(q)) return "Hale";
+    if (/\brook\b/.test(q)) return "Rook";
+    if (/\bvoss\b/.test(q)) return "Voss";
+    if (/\bpike\b/.test(q)) return "Pike";
+    return window.__laTalkWho === "Hale" ? "Hale" : "Rook";
+  }
+
+  function lockLine(s, who) {
     const held = (s && s.held) || "none";
+    const hale = who === "Hale";
     if (s && s.airlock && s.airlock !== "idle") {
-      return {
-        rook: "Lock is cycling. Stand still. If you walk off, it aborts.",
-        hale: "Equalizing. Wait for the hatch lamp. Then the pad.",
-      };
+      return hale
+        ? "It's equalizing. Stand in the lock. When the lamp changes, walk through."
+        : "Lock is cycling. Don't walk off the threshold or it aborts.";
     }
     if (s && s.donning > 0) {
-      return {
-        rook: "Suit is still sealing. Wait for the visor. Then face the hatch and E.",
-        hale: "Do not cycle while the pack is still latching.",
-      };
+      return hale
+        ? "Your pack is still latching. Wait for the visor, then the hatch."
+        : "Suit's still sealing. Visor first, then E on the hatch.";
     }
     if (s && !s.suited && !s.outside) {
-      return {
-        rook: "You are in shirtsleeves. Orange suit on the rack by the airlock first. Walk up, E, wait for the visor. Then face the round hatch and E again.",
-        hale: "The lock will not open for an unsuited body. That is the whole point of the lock.",
-      };
+      return hale
+        ? "The lock will not cycle shirtsleeves. Orange rack by the hatch. E, wait, then the hatch."
+        : "You're not in a suit. Orange rack by the airlock, E, wait for the visor, then face the round hatch and E.";
     }
     if (held && held !== "none" && /crate|feed|paver/.test(held)) {
-      return {
-        rook: "Drop the " + held + " first. The lock will not cycle with cargo in your hands.",
-        hale: "Unload. Feedstock and pavers stay this side.",
-      };
+      return hale
+        ? "Put the " + held + " down. We don't pump cargo through the lock."
+        : "Drop the " + held + " first. Lock won't cycle with cargo in your hands.";
     }
     if (s && typeof s.power === "number" && s.power < 18) {
-      return {
-        rook: "Bus is too thin to pump the lock. Clear the arrays, then cycle.",
-        hale: "We spend power to equalize. Dusty arrays, no hatch.",
-      };
+      return hale
+        ? "Not enough bus to run the pumps. Arrays first, then the hatch."
+        : "Bus is too thin to pump the lock. Wipe the arrays east of the hatch.";
     }
     if (s && s.storm > 0.45) {
-      return {
-        rook: "Storm lock. Pumps can't fight that dust. Wait it out.",
-        hale: "Sealed until the blow passes. Do not force it.",
-      };
+      return hale
+        ? "We're sealed until this blow passes. Don't force the hatch."
+        : "Storm lock. Pumps can't fight that dust. Wait it out.";
     }
     if (s && s.outside && typeof s.o2 === "number" && s.o2 < 22) {
-      return {
-        rook: "Pack is thin. Face the hatch from the pad and E. Come in.",
-        hale: "Ingress now. Science can wait.",
-      };
+      return hale
+        ? "Pack is thin. Face the hatch from the pad and come in."
+        : "Pack's low. Hatch on the hab wall, E, come in.";
     }
     if (s && s.outside) {
-      return {
-        rook: "You are already EVA. Face the round hatch on the hab wall, wait for the prompt, then E. Do not stand out on the pad and mash it.",
-        hale: "Ingress is the hatch, not the rover. Look at the lock.",
-      };
+      return hale
+        ? "You're already out. Ingress is the round hatch on the hull, not the rover."
+        : "You're EVA. Face the round hatch on the hab, wait for the prompt, E.";
     }
     if (s && s.suited && !s.outside) {
-      return {
-        rook: "You are suited. Face the round hatch in the wall until the prompt comes up, then E. Wait while it equalizes. Do not walk off.",
-        hale: "Look at the hatch, not the rack. E cycles it. Count two breaths.",
-      };
+      return hale
+        ? "You're sealed. Look at the hatch, not the rack. E, then walk through while it equalizes."
+        : "Suited. Face the round hatch until the prompt, E, wait, then walk through. Don't mash it from the pad.";
     }
-    return {
-      rook: "Suit, then hatch, then E. Dust stays outside. That is the lock.",
-      hale: "Rack suit. Hatch. Equalize. In that order.",
-    };
+    return hale
+      ? "Suit, hatch, equalize. In that order."
+      : "Suit, then hatch, then E. Dust stays outside.";
   }
 
   function answer(asked, world, live) {
     const q = String(asked || "").toLowerCase().replace(/\s+/g, " ").trim();
     if (!q) return null;
     const s = live || st() || world || {};
-    const toHale = /\bhale\b/.test(q);
-    const toRook = /\brook\b/.test(q);
-    const lockQ = /airlock|air lock|\block\b|hatch|eva|cycle/.test(q);
-    const whyQ = /why|not work|doesn't work|doesnt work|won't|wont|can't|cant|broken|stuck|ignore|help|how|fix/.test(q);
+    const who = whoOf(q);
+    const hale = who === "Hale";
+    let text = "";
 
-    let hale = "";
-    let rook = "";
-
-    if (lockQ || (whyQ && /suit|hatch|door|outside|pad/.test(q))) {
-      const w = lockWhy(s);
-      rook = w.rook;
-      hale = w.hale;
-      if (whyQ && lockQ && (s.suited || s.outside || (s.airlock && s.airlock !== "idle"))) {
-        try {
-          if (typeof window.__laCycleLock === "function") window.__laCycleLock();
-        } catch {}
-      }
+    if (/airlock|air lock|\block\b|hatch|eva|cycle|go outside|go out|can't leave|cant leave|won't open|wont open/.test(q)) {
+      text = lockLine(s, who);
     } else if (/suit|visor|helmet|pack/.test(q)) {
-      rook = s.suited
-        ? "Pack is on. Hatch next. E on the lock."
-        : "Orange suit on the rack by the airlock. Walk up, E, wait until the visor finishes.";
-      hale = s.suited ? "Good. Now the hatch." : "The rack, not the hatch. Seal first.";
-    } else if (/power|array|solar|bus|battery/.test(q)) {
-      rook =
-        (s.solar || 0) < 42
-          ? "Arrays are dirty. That is why the bus is thin. Walk east of the hatch and wipe them."
-          : "Arrays are holding. If the lock still sulks, it is suit or hatch, not power.";
-      hale = "Power is solar plus batteries. No pile. Dust is the enemy.";
-    } else if (/job|what do|what should|next|stuck/.test(q)) {
-      rook = s.job
-        ? "Do this: " + s.job + (s.why ? " — " + s.why : "")
-        : "Suit. Hatch. Arrays. In that order unless I said otherwise.";
-      hale = s.job ? "Rook has the bus. I want the science after you can breathe." : "Keep the cabin breathing. Then we look.";
-    } else if (/hello|hi\b|hey|status|report/.test(q)) {
-      rook = s.outside
-        ? "You are EVA. I keep the bus. Don't linger."
-        : "Cabin is mine. Ask a real question.";
-      hale = "Hale. Science loop. Speak.";
-    } else if (toHale && !toRook) {
-      hale = s.outside
-        ? "I hear you. Come back through the lock if the pack thins."
-        : "Ask me about the lock, the peg, the mill, or the ice. I will answer.";
-      rook = "";
-    } else if (toRook && !toHale) {
-      rook = "Copy. Suit, hatch, arrays, then talk. What is actually broken.";
-      hale = "";
+      text = s.suited
+        ? hale
+          ? "Pack is on. Hatch is next."
+          : "Pack's on. Face the hatch and E."
+        : hale
+          ? "Orange suit on the rack by the lock. E and wait until the visor finishes."
+          : "Rack by the airlock. Walk up, E, wait for the visor.";
+    } else if (/power|array|solar|bus|battery|dusty|dirty/.test(q)) {
+      text =
+        (s.solar || 0) < 42 || /dirty|dust/.test(q)
+          ? hale
+            ? "Dust on the arrays is why the cabin goes hungry. East of the hatch — wipe them, then the bus comes back."
+            : "If they look dirty, they are. Walk east of the hatch and wipe them. Thin bus is dust, not a dead pile."
+          : hale
+            ? "Power is holding. If the lock still sulks, it's suit or hatch, not the arrays."
+            : "Arrays are holding. If the lock sulks, it's suit or hatch, not power.";
+    } else if (/what should i|what do i|what next|job|stuck|help me|what now/.test(q)) {
+      text = s.job
+        ? hale
+          ? "Right now: " + s.job + (s.why ? " " + s.why : "")
+          : "Do this: " + s.job + (s.why ? " — " + s.why : "")
+        : hale
+          ? "Keep the cabin breathing. Suit, hatch, arrays. Then we look at the rock."
+          : "Suit. Hatch. Arrays. Unless I said otherwise.";
+    } else if (/where are you|who are you|name/.test(q)) {
+      text = hale
+        ? "Hale. Science loop. I'm in the hab if you want a real answer."
+        : "Rook. I keep the bus. You walked up, so talk.";
+    } else if (/hello|hi\b|hey|status|report|how are you/.test(q)) {
+      text = hale
+        ? s.outside
+          ? "I hear you. Don't linger. Pack and hatch."
+          : "Hale. Cabin is quiet. Ask me something that has a name: lock, peg, mill, ice."
+        : s.outside
+          ? "You're EVA. I keep the bus. Ask if something is actually broken."
+          : "Cabin is mine. Ask a real question.";
+    } else if (/ice|water|hydro|mill|peg|litho|voss|pike|lems|ltv|rover/.test(q)) {
+      text = hale
+        ? s.job
+          ? "On that: " + s.job + (s.why ? " " + s.why : "") + " I care about the rock after you can breathe."
+          : "Name the site. Ice, peg, mill, litho — I'll tell you what I know. Don't wander the dark with a thin pack."
+        : s.job
+          ? "Copy. " + s.job + (s.why ? " — " + s.why : "") + " I keep the bus while you walk it."
+          : "If it's broken, name it. I keep the bus. Hale keeps the ears.";
     } else {
-      rook = s.outside
-        ? "Copy. I keep the bus. If the lock is the problem, face the hatch and E."
-        : "Copy. If something is broken, name it. Lock, suit, power, hatch.";
-      hale = "Say the system. Airlock, arrays, peg, mill. I do not guess.";
+      text = hale
+        ? "I heard you. Ask about the lock, the arrays, the peg, the mill, or the ice — I'll answer that, not a speech."
+        : "Copy. Name what's broken: lock, suit, power, hatch. I don't guess.";
     }
 
-    if (toHale && !hale) hale = "Hale. Go ahead.";
-    if (toRook && !rook) rook = "Rook. Go ahead.";
-    if (!toHale && !toRook) {
-      if (!rook) rook = "Copy. I keep the bus.";
-      if (!hale) hale = "Hale. I am on the loop.";
-    }
-    return { rook, hale };
+    return { who, text, rook: who === "Rook" ? text : "", hale: who === "Hale" ? text : "" };
   }
 
   window.__laCrewAsk = function (asked, world, live) {
     try {
       return answer(asked, world, live && live.getState ? live.getState() : live);
     } catch {
-      return {
-        rook: "Copy. Face the hatch, E to cycle. Suit first.",
-        hale: "Name the fault. I will answer.",
-      };
+      return { who: "Rook", text: "Copy. Say that again.", rook: "Copy. Say that again.", hale: "" };
     }
   };
 
   let lastAsk = "";
   let lastAskAt = 0;
-  function pushBoth(asked) {
+  function pushAsk(asked) {
     const now = performance.now();
     const Y = store();
     if (!Y || !Y.getState) return false;
@@ -170,16 +164,14 @@
     } catch {}
     const a = window.__laCrewAsk(text, null, g);
     try {
-      if (a && a.rook) g.pushTalk("Rook", a.rook);
-      if (a && a.hale) {
-        g.pushTalk("Hale", a.hale);
-        g.say && g.say("Hale", a.hale);
-      }
+      const who = (a && a.who) || "Rook";
+      const line = (a && a.text) || (who === "Hale" ? a && a.hale : a && a.rook);
+      if (line) g.pushTalk && g.pushTalk(who, line);
       g.setTalkBusy && g.setTalkBusy(false);
     } catch {}
     return true;
   }
-  window.__laAskCrew = pushBoth;
+  window.__laAskCrew = pushAsk;
 
   function openTalk() {
     const Y = store();
@@ -210,7 +202,7 @@
         if (v) {
           e.preventDefault();
           e.stopPropagation();
-          pushBoth(v);
+          pushAsk(v);
           el.value = "";
           try {
             el.dispatchEvent(new Event("input", { bubbles: true }));
@@ -234,7 +226,7 @@
       if (!v) return;
       e.preventDefault();
       e.stopImmediatePropagation();
-      pushBoth(v);
+      pushAsk(v);
       input.value = "";
       try {
         input.dispatchEvent(new Event("input", { bubbles: true }));
