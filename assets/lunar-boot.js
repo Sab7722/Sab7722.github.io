@@ -41,6 +41,8 @@
   const held = Object.create(null);
   let lastStartAt = 0;
   let spawnFix = 0;
+  let lastOut = false;
+  let lastAir = "idle";
 
   function store() {
     return window.__laStore || (window.__controlsTest && window.__controlsTest.store) || null;
@@ -383,22 +385,58 @@
         const r = Math.hypot(s.px || 0, s.pz || 0);
         if (r < 5.5) keepHatchOpen(6000);
       }
-      if (s.outside && nearSouthHatch(s) && t) {
-        const r = Math.hypot(s.px || 0, s.pz || 0);
-        if (!window.__laFacedOut && t.setLook) {
-          window.__laFacedOut = true;
-          t.setLook(0, -0.05);
+      const rNow = Math.hypot(s.px || 0, s.pz || 0);
+      const now = performance.now();
+      if (s.airlock === "egress") {
+        if (!window.__laEvaT) window.__laEvaT = now;
+        keepHatchOpen(10000);
+        if (t && t.setPos) {
+          const z = s.pz || 0;
+          if (z > -8.6) t.setPos(0, z - 0.1);
+          if (t.setLook) t.setLook(0, -0.05);
+        }
+        if (now - window.__laEvaT > 2200) {
           try {
-            const Y = store();
-            if (Y) Y.setState({ heading: 0 });
+            store().setState({ outside: true, airlock: "idle", lockT: 0, vehicle: "walk" });
           } catch (err) {}
+          if (t && t.setPos) t.setPos(0, -8.8);
+          if (t && t.setLook) t.setLook(0, -0.05);
+          window.__laEvaT = 0;
         }
-        if (held.KeyW && r < 7 && t.setPos) {
-          t.setPos(s.px || 0, (s.pz || 0) - 0.05);
-        }
-      } else if (!s.outside) {
-        window.__laFacedOut = false;
+      } else {
+        window.__laEvaT = 0;
       }
+      if (s.airlock === "ingress") {
+        if (!window.__laInT) window.__laInT = now;
+        keepHatchOpen(10000);
+        if (t && t.setPos) {
+          const z = s.pz || 0;
+          if (z < -1.5) t.setPos(0, z + 0.1);
+        }
+        if (now - window.__laInT > 2200) {
+          try {
+            store().setState({ outside: false, airlock: "idle", lockT: 0, vehicle: "walk" });
+          } catch (err) {}
+          if (t && t.setPos) t.setPos(0, -1.5);
+          window.__laInT = 0;
+        }
+      } else {
+        window.__laInT = 0;
+      }
+      if (s.outside && !lastOut) {
+        if (t && t.setPos) t.setPos(0, -8.8);
+        if (t && t.setLook) t.setLook(0, -0.05);
+        keepHatchOpen(8000);
+      }
+      if (!s.outside && lastOut) {
+        if (rNow > 3.2 && t && t.setPos) t.setPos(0, -1.5);
+      }
+      lastOut = !!s.outside;
+      lastAir = s.airlock || "idle";
+      if (s.outside && nearSouthHatch(s) && t && held.KeyW && rNow < 8.5 && t.setPos) {
+        t.setPos(s.px || 0, (s.pz || 0) - 0.06);
+      }
+      if (!s.outside) window.__laFacedOut = false;
       const want = held.KeyW || held.KeyS || held.KeyA || held.KeyD;
       if (want) syncKeys();
     } catch {}
