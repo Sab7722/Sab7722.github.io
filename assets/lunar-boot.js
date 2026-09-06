@@ -390,16 +390,11 @@
       if (s.airlock === "egress") {
         if (!window.__laEvaT) window.__laEvaT = now;
         keepHatchOpen(10000);
-        if (t && t.setPos) {
-          const z = s.pz || 0;
-          if (z > -8.6) t.setPos(0, z - 0.1);
-          if (t.setLook) t.setLook(0, -0.05);
-        }
         if (now - window.__laEvaT > 2200) {
           try {
             store().setState({ outside: true, airlock: "idle", lockT: 0, vehicle: "walk" });
           } catch (err) {}
-          if (t && t.setPos) t.setPos(0, -8.8);
+          if (t && t.setPos) t.setPos(0, -14);
           if (t && t.setLook) t.setLook(0, -0.05);
           window.__laEvaT = 0;
         }
@@ -409,10 +404,6 @@
       if (s.airlock === "ingress") {
         if (!window.__laInT) window.__laInT = now;
         keepHatchOpen(10000);
-        if (t && t.setPos) {
-          const z = s.pz || 0;
-          if (z < -1.5) t.setPos(0, z + 0.1);
-        }
         if (now - window.__laInT > 2200) {
           try {
             store().setState({ outside: false, airlock: "idle", lockT: 0, vehicle: "walk" });
@@ -424,18 +415,12 @@
         window.__laInT = 0;
       }
       if (s.outside && !lastOut) {
-        if (t && t.setPos) t.setPos(0, -8.8);
+        if (rNow < 10 && t && t.setPos) t.setPos(0, -14);
         if (t && t.setLook) t.setLook(0, -0.05);
         keepHatchOpen(8000);
       }
-      if (!s.outside && lastOut) {
-        if (rNow > 3.2 && t && t.setPos) t.setPos(0, -1.5);
-      }
       lastOut = !!s.outside;
       lastAir = s.airlock || "idle";
-      if (s.outside && nearSouthHatch(s) && t && held.KeyW && rNow < 8.5 && t.setPos) {
-        t.setPos(s.px || 0, (s.pz || 0) - 0.06);
-      }
       if (!s.outside) window.__laFacedOut = false;
       const want = held.KeyW || held.KeyS || held.KeyA || held.KeyD;
       if (want) syncKeys();
