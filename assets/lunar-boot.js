@@ -28,6 +28,35 @@
   } catch (err) {}
 
   try {
+    const proto = HTMLElement.prototype;
+    if (typeof proto.requestPointerLock === "function" && !proto.__laRpl) {
+      proto.__laRpl = true;
+      const orig = proto.requestPointerLock;
+      proto.requestPointerLock = function (...args) {
+        try {
+          if (!this.isConnected || this.ownerDocument !== document) return Promise.resolve();
+          const ret = orig.apply(this, args);
+          if (ret && typeof ret.then === "function") return ret.catch(function () {});
+          return ret;
+        } catch (err) {
+          return Promise.resolve();
+        }
+      };
+    }
+    if (typeof document.exitPointerLock === "function" && !document.__laEpl) {
+      document.__laEpl = true;
+      const ex = document.exitPointerLock.bind(document);
+      document.exitPointerLock = function () {
+        try {
+          const ret = ex();
+          if (ret && typeof ret.then === "function") return ret.catch(function () {});
+          return ret;
+        } catch (err) {}
+      };
+    }
+  } catch (err) {}
+
+  try {
     const w = console.warn.bind(console);
     console.warn = function (...a) {
       const s = a[0] != null ? String(a[0]) : "";
