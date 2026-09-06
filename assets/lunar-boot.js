@@ -72,6 +72,13 @@
     return dist(s.px, s.pz, HATCH.x, HATCH.z) < 5.2;
   }
 
+  function typing() {
+    const el = document.activeElement;
+    if (el && /INPUT|TEXTAREA|SELECT/.test(el.tagName || "")) return true;
+    const s = st();
+    return !!(s && s.talkOpen);
+  }
+
   function fireReact(el) {
     if (!el) return false;
     const pk = Object.keys(el).find((k) => k.startsWith("__reactProps"));
@@ -251,6 +258,7 @@
     armLock("egress");
     return true;
   }
+  window.__laCycleLock = cycleLock;
 
   function placeSpawn(Y, t, withLook) {
     try {
@@ -523,6 +531,18 @@
 
   function onKey(e) {
     const down = e.type === "keydown";
+    if (typing()) {
+      if (down && e.code === "Escape") {
+        const Y = store();
+        try {
+          if (Y && Y.getState && Y.getState().setTalkOpen) Y.getState().setTalkOpen(false);
+        } catch {}
+      }
+      if (down && (e.code === "KeyW" || e.code === "KeyA" || e.code === "KeyS" || e.code === "KeyD")) {
+        held[e.code] = false;
+      }
+      return;
+    }
     if (e.repeat && e.code !== "KeyE") {
       if (down) held[e.code] = true;
       return;
@@ -564,6 +584,7 @@
   document.addEventListener(
     "mousemove",
     (e) => {
+      if (typing()) return;
       const s = st();
       if (!s || !s.play || s.paused || s.screen !== "play") return;
       const mx = e.movementX || 0;
@@ -705,7 +726,7 @@
         return;
       }
 
-      if (!s.play || s.paused || s.screen === "home" || s.screen === "settings") return;
+      if (!s.play || s.paused || s.screen === "home" || s.screen === "settings" || s.talkOpen) return;
       if (s.airlock && s.airlock !== "idle") return;
       if (s.donning > 0) return;
 
