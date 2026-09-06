@@ -61,7 +61,7 @@
 
   function startPlay(fresh) {
     const now = performance.now();
-    if (now - lastStartAt < 350) return;
+    if (lastStartAt > 0 && now - lastStartAt < 350) return;
     lastStartAt = now;
     const Y = store();
     if (!Y || !Y.getState) return;
@@ -213,6 +213,15 @@
 
   function onKey(e) {
     const down = e.type === "keydown";
+    const tag = (e.target && e.target.tagName) || "";
+    const s0 = st();
+    if (tag === "INPUT" || tag === "TEXTAREA" || (s0 && s0.talkOpen && tag !== "BODY" && tag !== "")) {
+      if (down && e.code === "Escape" && s0 && s0.setTalkOpen) s0.setTalkOpen(false);
+      return;
+    }
+    if (s0 && s0.talkOpen && (e.code === "KeyW" || e.code === "KeyA" || e.code === "KeyS" || e.code === "KeyD")) {
+      return;
+    }
     if (e.repeat && e.code !== "KeyE") {
       if (down) held[e.code] = true;
       return;
@@ -250,72 +259,34 @@
       if (!s) return;
       if (s.play && s.screen === "play" && spawnFix > 0) {
         spawnFix--;
-        if (s.seated || s.paused || (s.cine | 0) >= 0) {
-          Y.setState({
-            seated: false,
-            paused: false,
-            cine: -1,
-            vehicle: "walk",
-            screen: "play",
-          });
-        }
-        const has = s.found && s.found.length;
-        if (!has) {
-          const need = s.outside || Math.hypot(s.px || 0, s.pz || 0) < 1.05 || Math.abs((s.pz || 0) + 1.48) < 0.05;
-          if (need || spawnFix > 12) {
-            Y.setState({
-              outside: false,
-              suited: false,
-              px: 2.72,
-              pz: 0.15,
-              heading: 1.2,
-              airlock: "idle",
-              lockT: 0,
-              donning: 0,
-              seated: false,
-              vehicle: "walk",
-            });
-            if (t && t.setPos) t.setPos(2.72, 0.15);
-            if (t && t.setLook) t.setLook(1.2, -0.05);
+        if (s.airlock && s.airlock !== "idle") {
+          spawnFix = 0;
+        } else {
+          const has = s.found && s.found.length;
+          if (!has) {
+            const need = s.outside || Math.hypot(s.px || 0, s.pz || 0) < 1.05 || Math.abs((s.pz || 0) + 1.48) < 0.05;
+            if (need || spawnFix > 12) {
+              Y.setState({
+                outside: false,
+                suited: false,
+                px: 2.72,
+                pz: 0.15,
+                heading: 1.2,
+                airlock: "idle",
+                lockT: 0,
+                donning: 0,
+                seated: false,
+                vehicle: "walk",
+              });
+              if (t && t.setPos) t.setPos(2.72, 0.15);
+              if (spawnFix === 17 && t && t.setLook) t.setLook(1.2, -0.05);
+            }
           }
         }
       }
       if (!s.play || s.paused || s.screen === "home" || s.screen === "settings") return;
       const want = held.KeyW || held.KeyS || held.KeyA || held.KeyD;
-      if (want) {
-        syncKeys();
-        if (t && t.setPos && t.getYaw) {
-          const spd = t.getSpeed ? Math.abs(t.getSpeed()) : 0;
-          if (spd >= 0.35) return;
-          const cur = t.snap ? t.snap() : s;
-          const yaw = t.getYaw();
-          const step = 0.16;
-          const fx = -Math.sin(yaw),
-            fz = -Math.cos(yaw);
-          const rx = Math.cos(yaw),
-            rz = -Math.sin(yaw);
-          let dx = 0,
-            dz = 0;
-          if (held.KeyW) {
-            dx += fx;
-            dz += fz;
-          }
-          if (held.KeyS) {
-            dx -= fx;
-            dz -= fz;
-          }
-          if (held.KeyD) {
-            dx += rx;
-            dz += rz;
-          }
-          if (held.KeyA) {
-            dx -= rx;
-            dz -= rz;
-          }
-          const len = Math.hypot(dx, dz) || 1;
-          t.setPos(cur.px + (dx / len) * step, cur.pz + (dz / len) * step);
-        }
-      }
+      if (want) syncKeys();
     } catch {}
   }
   requestAnimationFrame(tick);
