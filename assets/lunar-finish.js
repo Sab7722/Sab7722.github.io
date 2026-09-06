@@ -381,7 +381,9 @@
       if (s.play && !window.__laPlayAt) window.__laPlayAt = now;
       if (!s.play) window.__laPlayAt = 0;
       const readyOut = !!(s.play && s.outside);
-      if (readyOut) {
+      const away = readyOut && Math.hypot(s.px || 0, s.pz || 0) > 12;
+      if (away && !window.__laOutAt) window.__laOutAt = now;
+      if (away && window.__laOutAt && now - window.__laOutAt > 400) {
         if (!ltvDone) dressLtv();
         if (!dockG) buildDock();
       }

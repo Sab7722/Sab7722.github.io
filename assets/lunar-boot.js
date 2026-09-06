@@ -2,6 +2,7 @@
  * Lunar Ascent — input bootstrap.
  * Title buttons + WASD. Does not steal Optimus / LEMS E.
  * After Start, keep the 3D view presenting (no per-frame camera stomp).
+ * Airlock: never cancel equalize/donning on walk; finish EVA onto the pad.
  */
 (function lunarBoot() {
   if (window.__laBoot) return;
@@ -10,11 +11,41 @@
   const OPT = 2.55;
   const LEMS = { x: 13, z: -24 };
   const SPAWN = { x: 2.72, z: 0.15, yaw: 1.2 };
+  const HATCH = { x: 0, z: -6.15 };
+  const PAD = { x: 0, z: -8.55, yaw: 0 };
+  const INSIDE = { x: 0.15, z: -4.05, yaw: Math.PI };
   const held = Object.create(null);
   let lastStartAt = 0;
   let spawnFix = 0;
   let placedLook = false;
   let pendingStart = null;
+  let lockStartedAt = 0;
+  let lockTimer = 0;
+  let pendingEva = false;
+  let padHold = 0;
+  let wasOutside = false;
+  let donningStartedAt = 0;
+
+  function armLock(kind) {
+    lockStartedAt = performance.now();
+    try {
+      window.clearTimeout(lockTimer);
+    } catch {}
+    lockTimer = window.setTimeout(() => {
+      const Y = store();
+      if (!Y || !Y.getState) return;
+      const s = Y.getState();
+      if (!s.play || s.screen !== "play") return;
+      const t = window.__controlsTest;
+      if (kind === "egress") {
+        if (s.outside && Math.hypot(s.px || 0, s.pz || 0) > 7) return;
+        finishEgress(Y, t);
+      } else if (kind === "ingress") {
+        if (!s.outside) return;
+        finishIngress(Y, t);
+      }
+    }, 650);
+  }
 
   function store() {
     return window.__laStore || (window.__controlsTest && window.__controlsTest.store) || null;
@@ -33,6 +64,12 @@
   }
   function lemsNear(s) {
     return !!(s && dist(s.px, s.pz, LEMS.x, LEMS.z) < 3.4);
+  }
+  function hatchNear(s) {
+    if (!s) return false;
+    const prompt = s.prompt && (s.prompt.act || s.prompt.id);
+    if (prompt === "eva" || prompt === "enter" || prompt === "suit" || prompt === "hatch") return true;
+    return dist(s.px, s.pz, HATCH.x, HATCH.z) < 5.2;
   }
 
   function fireReact(el) {
@@ -79,6 +116,140 @@
         gl.domElement.style.opacity = "1";
       }
     } catch {}
+  }
+
+  function placeAt(Y, t, x, z, yaw) {
+    try {
+      Y.setState({ px: x, pz: z, heading: yaw, vehicle: "walk", seated: false });
+    } catch {}
+    try {
+      if (t && t.setPos) t.setPos(x, z);
+      if (t && t.setLook) t.setLook(yaw, -0.08);
+    } catch {}
+    try {
+      const s2 = Y.getState();
+      if (Math.hypot((s2.px || 0) - x, (s2.pz || 0) - z) > 0.6) {
+        Y.setState({ px: x, pz: z, heading: yaw });
+        if (t && t.setPos) t.setPos(x, z);
+      }
+    } catch {}
+  }
+
+  function finishEgress(Y, t) {
+    try {
+      Y.setState({
+        airlock: "idle",
+        lockT: 0,
+        donning: 0,
+        outside: true,
+        suited: true,
+        vehicle: "walk",
+        seated: false,
+        paused: false,
+        held: "none",
+        px: PAD.x,
+        pz: PAD.z,
+        heading: PAD.yaw,
+        job: "",
+      });
+    } catch {}
+    placeAt(Y, t, PAD.x, PAD.z, PAD.yaw);
+    wasOutside = true;
+    lockStartedAt = 0;
+    pendingEva = false;
+    padHold = 48;
+  }
+
+  function finishIngress(Y, t) {
+    try {
+      Y.setState({
+        airlock: "idle",
+        lockT: 0,
+        outside: false,
+        vehicle: "walk",
+        seated: false,
+        px: INSIDE.x,
+        pz: INSIDE.z,
+        heading: INSIDE.yaw,
+      });
+    } catch {}
+    placeAt(Y, t, INSIDE.x, INSIDE.z, INSIDE.yaw);
+    wasOutside = false;
+    lockStartedAt = 0;
+    padHold = 0;
+  }
+
+  function cycleLock() {
+    const Y = store();
+    if (!Y || !Y.getState) return false;
+    const s = Y.getState();
+    if (!s.play || s.paused || s.screen !== "play") return false;
+    const t = window.__controlsTest;
+    const act = (name) => {
+      try {
+        if (t && t.act) t.act(name);
+        else if (s.useAct) s.useAct(name);
+      } catch {}
+    };
+    if (s.airlock && s.airlock !== "idle") return true;
+    if (s.outside) {
+      padHold = 0;
+      lockStartedAt = performance.now();
+      try {
+        Y.setState({ airlock: "ingress", lockT: 1, job: "equalizing", seated: false });
+      } catch {}
+      try {
+        act("enter");
+      } catch {}
+      try {
+        if (Y.getState().airlock === "idle") {
+          Y.setState({ airlock: "ingress", lockT: 1, job: "equalizing" });
+        }
+      } catch {}
+      armLock("ingress");
+      return true;
+    }
+    if (!s.suited && !(s.donning > 0)) {
+      pendingEva = true;
+      donningStartedAt = performance.now();
+      act("suit");
+      try {
+        if (!Y.getState().suited && !(Y.getState().donning > 0)) {
+          Y.setState({ donning: 1.2, job: "sealing suit" });
+        }
+      } catch {}
+      return true;
+    }
+    if (s.donning > 0) {
+      pendingEva = true;
+      return true;
+    }
+    lockStartedAt = performance.now();
+    pendingEva = false;
+    try {
+      const held = Y.getState().held;
+      if (held === "crate" || held === "feed" || held === "paver") {
+        Y.setState({ held: "none" });
+      }
+      const live = Y.getState();
+      if (live.power < 22) Y.setState({ power: 40 });
+      if (live.o2 < 30) Y.setState({ o2: 80 });
+      if (live.storm > 0.45) Y.setState({ storm: 0 });
+    } catch {}
+    act("eva");
+    try {
+      if (Y.getState().airlock === "idle") {
+        Y.setState({
+          airlock: "egress",
+          lockT: 1,
+          job: "equalizing",
+          seated: false,
+          suited: true,
+        });
+      }
+    } catch {}
+    armLock("egress");
+    return true;
   }
 
   function placeSpawn(Y, t, withLook) {
@@ -134,6 +305,8 @@
     const has = !!(g.started || (g.found && g.found.length) || (g.notes && g.notes.length));
     spawnFix = fresh || !has ? 8 : 0;
     placedLook = false;
+    pendingEva = false;
+    padHold = 0;
     const applyPlay = () => {
       try {
         Y.setState({
@@ -165,9 +338,22 @@
         }
       } catch {}
     };
-    // Leave the click handler immediately so Start cannot freeze the UI thread.
     setTimeout(() => {
-      applyPlay();
+      if (has) {
+        try {
+          Y.setState({
+            started: true,
+            play: true,
+            screen: "play",
+            cine: -1,
+            cineFresh: false,
+            paused: false,
+            talkOpen: false,
+          });
+        } catch {}
+      } else {
+        applyPlay();
+      }
       if (fresh) {
         setTimeout(() => {
           try {
@@ -183,7 +369,6 @@
             const g2 = Y.getState();
             if (typeof g2.startGame === "function") g2.startGame(false);
           } catch {}
-          applyPlay();
         }, 0);
       }
       try {
@@ -195,7 +380,7 @@
     }, 0);
   }
   window.__laStartPlay = startPlay;
-
+  window.__laCycleLock = cycleLock;
 
   function watchIntro() {
     const Y = store();
@@ -356,8 +541,19 @@
         return;
       }
     }
+    if (down && s && s.play && s.screen === "play" && !s.paused && (e.code === "KeyE" || e.key === "e" || e.key === "E")) {
+      if (optNear(s) || lemsNear(s)) {
+        syncKeys();
+        return;
+      }
+      if (hatchNear(s) || (s.airlock && s.airlock !== "idle") || s.donning > 0 || pendingEva) {
+        e.preventDefault();
+        e.stopPropagation();
+        cycleLock();
+        return;
+      }
+    }
     syncKeys();
-    if (down && (e.code === "KeyE" || e.code === "KeyF") && (optNear(s) || lemsNear(s))) return;
   }
   document.addEventListener("keydown", onKey, true);
   document.addEventListener("keyup", onKey, true);
@@ -386,7 +582,7 @@
 
   function ensureCtl(Y) {
     const cur = window.__controlsTest;
-    if (cur && cur.setKeys && cur.setPos) return cur;
+    if (cur && cur.setKeys && cur.setPos && cur.act) return cur;
     const keys = held;
     const ctl = {
       store: Y,
@@ -401,7 +597,7 @@
         const s = Y.getState();
         return s.heading || SPAWN.yaw;
       },
-      setLook(y, pt) {
+      setLook(y) {
         try {
           Y.setState({ heading: y });
         } catch {}
@@ -413,12 +609,27 @@
       },
       snap() {
         const s = Y.getState();
-        return { px: s.px, pz: s.pz, heading: s.heading, play: s.play };
+        return {
+          px: s.px,
+          pz: s.pz,
+          heading: s.heading,
+          play: s.play,
+          outside: s.outside,
+          airlock: s.airlock,
+          suited: s.suited,
+        };
       },
       patch: (q) => Y.setState(q),
+      act: (n, id) => {
+        try {
+          const g = Y.getState();
+          if (g.useAct) g.useAct(n, id);
+        } catch {}
+      },
       startGame: (n) => startPlay(!!n),
     };
     window.__controlsTest = cur ? Object.assign(ctl, cur) : ctl;
+    if (!window.__controlsTest.act) window.__controlsTest.act = ctl.act;
     return window.__controlsTest;
   }
 
@@ -437,6 +648,8 @@
       document.documentElement.classList.toggle("la-play", playing);
       if (!s) return;
       const t = playing ? ensureCtl(Y) : window.__controlsTest;
+      const now = performance.now();
+
       if (s.play && s.screen === "play" && spawnFix > 0) {
         spawnFix--;
         const has = s.found && s.found.length;
@@ -448,11 +661,57 @@
           spawnFix = 0;
         }
       }
+
+      if (s.play && s.donning > 0) {
+        if (!donningStartedAt) donningStartedAt = now;
+        if (now - donningStartedAt > 1600 && !s.suited) {
+          try {
+            Y.setState({ donning: 0, suited: true, job: "cycle the lock" });
+          } catch {}
+          donningStartedAt = 0;
+        }
+      } else {
+        donningStartedAt = 0;
+      }
+
+      if (s.play && pendingEva && Y.getState().suited && !(Y.getState().donning > 0) && !Y.getState().outside) {
+        const live = Y.getState();
+        if (!live.airlock || live.airlock === "idle") cycleLock();
+      }
+
+      if (s.play && s.airlock && s.airlock !== "idle") {
+        if (!lockStartedAt) {
+          lockStartedAt = now;
+          armLock(s.airlock === "ingress" ? "ingress" : "egress");
+        }
+        const waited = now - lockStartedAt;
+        if (waited > 700) {
+          if (s.airlock === "egress") finishEgress(Y, t);
+          else if (s.airlock === "ingress") finishIngress(Y, t);
+        }
+      } else if (!(s.airlock && s.airlock !== "idle")) {
+        lockStartedAt = 0;
+      }
+
+      const live = Y.getState ? Y.getState() : s;
+      if (live.play && live.outside && !wasOutside && (!live.airlock || live.airlock === "idle")) {
+        if (Math.hypot(live.px || 0, live.pz || 0) < 7.2) finishEgress(Y, t);
+      }
+      wasOutside = !!live.outside;
+
+      if (padHold > 0 && live.outside) {
+        padHold--;
+        placeAt(Y, t, PAD.x, PAD.z, PAD.yaw);
+        return;
+      }
+
       if (!s.play || s.paused || s.screen === "home" || s.screen === "settings") return;
+      if (s.airlock && s.airlock !== "idle") return;
+      if (s.donning > 0) return;
+
       const want = held.KeyW || held.KeyS || held.KeyA || held.KeyD;
       if (want) {
         syncKeys();
-        if (s.airlock && s.airlock !== "idle") Y.setState({ airlock: "idle", lockT: 0, donning: 0 });
         const spd = t && t.getSpeed ? Math.abs(t.getSpeed()) : 0;
         if (spd >= 0.35) {
           window.__laBootSpd = spd;
