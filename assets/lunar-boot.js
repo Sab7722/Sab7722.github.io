@@ -62,6 +62,33 @@
     const cur = typeof window.__laHatchOpen === "number" ? window.__laHatchOpen : 0;
     window.__laHatchOpen = Math.max(cur, until);
   }
+  function patchShadowMap() {
+    if (window.__laPcf) return;
+    try {
+      const canvas = document.querySelector("canvas");
+      const fiber = canvas && canvas.__r3f;
+      const st = fiber && typeof fiber.getState === "function" ? fiber.getState() : fiber;
+      const gl = st && st.gl;
+      const sm = gl && gl.shadowMap;
+      if (!sm) return;
+      window.__laPcf = true;
+      try {
+        sm.type = 1;
+      } catch (err) {}
+      try {
+        let cur = 1;
+        Object.defineProperty(sm, "type", {
+          configurable: true,
+          get() {
+            return cur === 2 ? 1 : cur;
+          },
+          set(v) {
+            cur = v === 2 ? 1 : v;
+          },
+        });
+      } catch (err) {}
+    } catch (err) {}
+  }
 
   function fireReact(el) {
     if (!el) return false;
@@ -309,6 +336,7 @@
   function tick() {
     requestAnimationFrame(tick);
     try {
+      patchShadowMap();
       const Y = store();
       const s = Y && Y.getState ? Y.getState() : null;
       const t = window.__controlsTest;

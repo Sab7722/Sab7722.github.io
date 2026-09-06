@@ -1,0 +1,15 @@
+{
+  "name": "Lunar Ascent",
+  "short_name": "Lunar Ascent",
+  "start_url": "/out.html",
+  "display": "standalone",
+  "background_color": "#0b0c0e",
+  "theme_color": "#0b0c0e",
+  "icons": [
+    {
+      "src": "/__grok/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
