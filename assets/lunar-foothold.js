@@ -37,6 +37,8 @@
   let lastSpeakAt = 0, lastStep = 0, lastPhrase = 0, phraseNodes = [];
   let lastAirlock = "";
   let extra = loadExtra();
+  let stoleOk = false;
+  let nextStealAt = 0;
 
   function loadExtra() {
     try {
@@ -127,62 +129,42 @@
     return null;
   }
   function stealTHREE() {
-    const canvases = document.querySelectorAll("canvas");
-    const canvas = canvases[0];
-    const keys = canvas ? Object.keys(canvas).filter((k) => k.indexOf("react") >= 0 || k.indexOf("r3f") >= 0 || k[0] === "_").slice(0, 12) : [];
+    if (stoleOk && scene && scene.traverse && Group && Mesh && BoxGeometry && MeshStandardMaterial) return true;
+    const now = performance.now();
+    if (now < nextStealAt) return false;
+    nextStealAt = now + 250;
     const a = api();
     if (a && a.scene && a.scene.traverse) scene = a.scene;
-    for (let ci = 0; ci < canvases.length; ci++) {
-      const c = canvases[ci];
-      scene = pickScene(c.__r3f) || scene;
-      if (!scene) {
-        for (const k in c) {
-          scene = pickScene(c[k]) || scene;
-          if (scene) break;
-        }
+    if (!scene) {
+      const canvases = document.querySelectorAll("canvas");
+      for (let ci = 0; ci < canvases.length && !scene; ci++) {
+        try { scene = pickScene(canvases[ci].__r3f) || scene; } catch {}
       }
-      if (!scene) {
-        const fiberKey = Object.keys(c).find((k) => k.indexOf("__reactFiber") === 0 || k.indexOf("__reactInternalInstance") === 0);
-        let f = fiberKey ? c[fiberKey] : null;
-        for (let i = 0; i < 60 && f && !scene; i++) {
-          let st = f.memoizedState;
-          for (let j = 0; j < 24 && st; j++) {
-            scene = pickScene(st.memoizedState) || scene;
-            st = st.next;
-          }
-          if (f.memoizedProps) scene = pickScene(f.memoizedProps) || scene;
-          if (f.stateNode) scene = pickScene(f.stateNode) || scene;
-          if (f.dependencies && f.dependencies.firstContext) {
-            let ctx = f.dependencies.firstContext;
-            for (let k = 0; k < 12 && ctx; k++) {
-              scene = pickScene(ctx.memoizedValue) || scene;
-              ctx = ctx.next;
-            }
-          }
-          f = f.return;
-        }
-      }
-      if (scene) break;
     }
     if (!scene || !scene.traverse) {
-      window.__laSteal = { scene: false, canvases: canvases.length, r3f: !!(canvas && canvas.__r3f), keys };
+      window.__laSteal = { scene: false, canvases: document.querySelectorAll("canvas").length };
       return false;
     }
-    scene.traverse((o) => {
-      if (!Group && o.isGroup) Group = o.constructor;
-      if (o.isMesh && o.geometry) {
-        Mesh = Mesh || o.constructor;
-        const typ = o.geometry.type || "";
-        if (typ.indexOf("Box") >= 0) BoxGeometry = BoxGeometry || o.geometry.constructor;
-        if (typ.indexOf("Cylinder") >= 0) CylinderGeometry = CylinderGeometry || o.geometry.constructor;
-        if (typ.indexOf("Sphere") >= 0) SphereGeometry = SphereGeometry || o.geometry.constructor;
-        const mat0 = Array.isArray(o.material) ? o.material[0] : o.material;
-        if (mat0 && mat0.isMaterial) MeshStandardMaterial = MeshStandardMaterial || mat0.constructor;
-      }
-    });
-    if (!Group && scene.constructor) Group = scene.constructor;
-    window.__laSteal = { scene: true, Mesh: !!Mesh, Box: !!BoxGeometry, Mat: !!MeshStandardMaterial, Group: !!Group };
-    return !!(Mesh && BoxGeometry && MeshStandardMaterial && Group);
+    if (!Group || !Mesh || !BoxGeometry || !MeshStandardMaterial) {
+      try {
+        scene.traverse((o) => {
+          if (!Group && o.isGroup) Group = o.constructor;
+          if (o.isMesh && o.geometry) {
+            Mesh = Mesh || o.constructor;
+            const typ = o.geometry.type || "";
+            if (typ.indexOf("Box") >= 0) BoxGeometry = BoxGeometry || o.geometry.constructor;
+            if (typ.indexOf("Cylinder") >= 0) CylinderGeometry = CylinderGeometry || o.geometry.constructor;
+            if (typ.indexOf("Sphere") >= 0) SphereGeometry = SphereGeometry || o.geometry.constructor;
+            const mat0 = Array.isArray(o.material) ? o.material[0] : o.material;
+            if (mat0 && mat0.isMaterial) MeshStandardMaterial = MeshStandardMaterial || mat0.constructor;
+          }
+        });
+      } catch {}
+      if (!Group && scene.constructor) Group = scene.constructor;
+    }
+    stoleOk = !!(scene && Group && Mesh && BoxGeometry && MeshStandardMaterial);
+    window.__laSteal = { scene: !!scene, Mesh: !!Mesh, Box: !!BoxGeometry, Mat: !!MeshStandardMaterial, Group: !!Group, stoleOk };
+    return stoleOk;
   }
   function mat(color, extraM) {
     return new MeshStandardMaterial({ color, roughness: 0.78, metalness: 0.22, ...(extraM || {}) });

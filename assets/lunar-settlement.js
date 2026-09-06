@@ -80,6 +80,8 @@
   let lastSpeakAt = 0, lastSave = 0, lastJobPri = 0;
   let wasPlay = false, lastAlarmAt = 0, lastCrewSay = 0;
   let colliders = [];
+  let stoleOk = false;
+  let nextStealAt = 0;
 
   function load() {
     const d = defaults();
@@ -290,27 +292,38 @@
     return null;
   }
   function stealTHREE() {
+    if (stoleOk && scene && scene.traverse && Group && Mesh && BoxGeometry && MeshStandardMaterial) return true;
+    const now = performance.now();
+    if (now < nextStealAt) return false;
+    nextStealAt = now + 250;
     const a = api();
     if (a && a.scene && a.scene.traverse) scene = a.scene;
-    const canvases = document.querySelectorAll("canvas");
-    for (let ci = 0; ci < canvases.length && !scene; ci++) {
-      scene = pickScene(canvases[ci].__r3f);
+    if (!scene) {
+      const canvases = document.querySelectorAll("canvas");
+      for (let ci = 0; ci < canvases.length && !scene; ci++) {
+        try { scene = pickScene(canvases[ci].__r3f) || scene; } catch {}
+      }
     }
     if (!scene || !scene.traverse) return false;
-    scene.traverse((o) => {
-      if (!Group && o.isGroup) Group = o.constructor;
-      if (o.isMesh && o.geometry) {
-        Mesh = Mesh || o.constructor;
-        const typ = o.geometry.type || "";
-        if (typ.indexOf("Box") >= 0) BoxGeometry = BoxGeometry || o.geometry.constructor;
-        if (typ.indexOf("Cylinder") >= 0) CylinderGeometry = CylinderGeometry || o.geometry.constructor;
-        if (typ.indexOf("Sphere") >= 0) SphereGeometry = SphereGeometry || o.geometry.constructor;
-        const mat0 = Array.isArray(o.material) ? o.material[0] : o.material;
-        if (mat0 && mat0.isMaterial) MeshStandardMaterial = MeshStandardMaterial || mat0.constructor;
-      }
-    });
-    if (!Group && scene.constructor) Group = scene.constructor;
-    return !!(Mesh && BoxGeometry && MeshStandardMaterial && Group);
+    if (!Group || !Mesh || !BoxGeometry || !MeshStandardMaterial) {
+      try {
+        scene.traverse((o) => {
+          if (!Group && o.isGroup) Group = o.constructor;
+          if (o.isMesh && o.geometry) {
+            Mesh = Mesh || o.constructor;
+            const typ = o.geometry.type || "";
+            if (typ.indexOf("Box") >= 0) BoxGeometry = BoxGeometry || o.geometry.constructor;
+            if (typ.indexOf("Cylinder") >= 0) CylinderGeometry = CylinderGeometry || o.geometry.constructor;
+            if (typ.indexOf("Sphere") >= 0) SphereGeometry = SphereGeometry || o.geometry.constructor;
+            const mat0 = Array.isArray(o.material) ? o.material[0] : o.material;
+            if (mat0 && mat0.isMaterial) MeshStandardMaterial = MeshStandardMaterial || mat0.constructor;
+          }
+        });
+      } catch {}
+      if (!Group && scene.constructor) Group = scene.constructor;
+    }
+    stoleOk = !!(scene && Group && Mesh && BoxGeometry && MeshStandardMaterial);
+    return stoleOk;
   }
   function mat(color, extraM) {
     return new MeshStandardMaterial({ color, roughness: 0.78, metalness: 0.22, ...(extraM || {}) });
