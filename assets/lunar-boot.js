@@ -6,6 +6,27 @@
   if (window.__laBoot) return;
   window.__laBoot = true;
 
+  try {
+    const proto = Element.prototype;
+    if (typeof proto.setPointerCapture === "function" && !proto.__laPtrCap) {
+      proto.__laPtrCap = true;
+      const cap = proto.setPointerCapture;
+      proto.setPointerCapture = function (id) {
+        try {
+          return cap.call(this, id);
+        } catch (err) {}
+      };
+      const rel = proto.releasePointerCapture;
+      if (typeof rel === "function") {
+        proto.releasePointerCapture = function (id) {
+          try {
+            return rel.call(this, id);
+          } catch (err) {}
+        };
+      }
+    }
+  } catch (err) {}
+
   const OPT = 2.55;
   const LEMS = { x: 13, z: -24 };
   const held = Object.create(null);
@@ -29,6 +50,17 @@
   }
   function lemsNear(s) {
     return !!(s && dist(s.px, s.pz, LEMS.x, LEMS.z) < 3.4);
+  }
+  function nearSouthHatch(s) {
+    if (!s) return false;
+    const px = s.px || 0;
+    const pz = s.pz || 0;
+    return Math.abs(px) < 1.45 && pz < -1.85 && Math.hypot(px, pz) < 6.8;
+  }
+  function keepHatchOpen(ms) {
+    const until = performance.now() + (ms || 8000);
+    const cur = typeof window.__laHatchOpen === "number" ? window.__laHatchOpen : 0;
+    window.__laHatchOpen = Math.max(cur, until);
   }
 
   function fireReact(el) {
@@ -242,6 +274,30 @@
     }
     syncKeys();
     if (down && (e.code === "KeyE" || e.code === "KeyF") && (optNear(s) || lemsNear(s))) return;
+    if (
+      down &&
+      e.code === "KeyE" &&
+      s &&
+      s.play &&
+      s.screen === "play" &&
+      !s.talkOpen &&
+      !s.paused &&
+      (s.cine | 0) < 0 &&
+      s.suited &&
+      !(s.donning > 0) &&
+      nearSouthHatch(s) &&
+      (!s.airlock || s.airlock === "idle")
+    ) {
+      try {
+        e.preventDefault();
+        e.stopImmediatePropagation();
+      } catch (err) {}
+      keepHatchOpen(12000);
+      try {
+        if (s.outside) s.useAct("enter");
+        else s.useAct("eva");
+      } catch (err) {}
+    }
   }
   document.addEventListener("keydown", onKey, true);
   document.addEventListener("keyup", onKey, true);
@@ -285,6 +341,11 @@
         }
       }
       if (!s.play || s.paused || s.screen === "home" || s.screen === "settings") return;
+      if (s.airlock && s.airlock !== "idle") keepHatchOpen(10000);
+      else if (nearSouthHatch(s) && s.suited) {
+        const r = Math.hypot(s.px || 0, s.pz || 0);
+        if (r < 5.5) keepHatchOpen(6000);
+      }
       const want = held.KeyW || held.KeyS || held.KeyA || held.KeyD;
       if (want) syncKeys();
     } catch {}
