@@ -291,8 +291,24 @@
     }
     return null;
   }
+  function isStdCtor(C) {
+    if (!C) return false;
+    if (C.__laIsStd === true) return true;
+    if (C.__laIsStd === false) return false;
+    try {
+      const m = new C({ color: 0xffffff });
+      const ok = !!(m && m.isMeshStandardMaterial && !m.isMeshBasicMaterial && typeof m.roughness === "number");
+      if (m && typeof m.dispose === "function") m.dispose();
+      C.__laIsStd = ok;
+      return ok;
+    } catch (e) {
+      C.__laIsStd = false;
+      return false;
+    }
+  }
   function stealTHREE() {
-    if (stoleOk && scene && scene.traverse && Group && Mesh && BoxGeometry && MeshStandardMaterial) return true;
+    if (MeshStandardMaterial && !isStdCtor(MeshStandardMaterial)) MeshStandardMaterial = null;
+    if (stoleOk && scene && scene.traverse && Group && Mesh && BoxGeometry && isStdCtor(MeshStandardMaterial)) return true;
     const now = performance.now();
     if (now < nextStealAt) return false;
     nextStealAt = now + 250;
@@ -305,7 +321,7 @@
       }
     }
     if (!scene || !scene.traverse) return false;
-    if (!Group || !Mesh || !BoxGeometry || !MeshStandardMaterial) {
+    if (!Group || !Mesh || !BoxGeometry || !isStdCtor(MeshStandardMaterial)) {
       try {
         scene.traverse((o) => {
           if (!Group && o.isGroup) Group = o.constructor;
@@ -316,17 +332,20 @@
             if (typ.indexOf("Cylinder") >= 0) CylinderGeometry = CylinderGeometry || o.geometry.constructor;
             if (typ.indexOf("Sphere") >= 0) SphereGeometry = SphereGeometry || o.geometry.constructor;
             const mat0 = Array.isArray(o.material) ? o.material[0] : o.material;
-            if (mat0 && mat0.isMaterial) MeshStandardMaterial = MeshStandardMaterial || mat0.constructor;
+            if (mat0 && mat0.isMeshStandardMaterial) MeshStandardMaterial = MeshStandardMaterial || mat0.constructor;
           }
         });
       } catch {}
       if (!Group && scene.constructor) Group = scene.constructor;
     }
-    stoleOk = !!(scene && Group && Mesh && BoxGeometry && MeshStandardMaterial);
+    stoleOk = !!(scene && Group && Mesh && BoxGeometry && isStdCtor(MeshStandardMaterial));
     return stoleOk;
   }
   function mat(color, extraM) {
-    return new MeshStandardMaterial({ color, roughness: 0.78, metalness: 0.22, ...(extraM || {}) });
+    const opts = isStdCtor(MeshStandardMaterial)
+      ? { color, roughness: 0.78, metalness: 0.22, ...(extraM || {}) }
+      : { color };
+    return new MeshStandardMaterial(opts);
   }
   function box(w, h, d, color, y) {
     const m = new Mesh(new BoxGeometry(w, h, d), mat(color));
