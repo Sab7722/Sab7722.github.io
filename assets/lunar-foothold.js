@@ -1296,12 +1296,7 @@
       lastT = now;
       const a = api();
       const s = st();
-      if (s && s.play && !window.__laPlayAt) window.__laPlayAt = now;
-      if (s && !s.play) window.__laPlayAt = 0;
-      const readyOut = !!(s && s.play && s.outside);
-      const away = readyOut && Math.hypot(s.px || 0, s.pz || 0) > 12;
-      if (away && !window.__laOutAt) window.__laOutAt = now;
-      if (!root && a && s && away && window.__laOutAt && now - window.__laOutAt > 400) buildWorld();
+      if (!root && a && s && (s.play || s.outside || s.screen === "play")) buildWorld();
       if (s && a) {
         tickJobPri(dt, s);
         tickScout(dt, s, a);
