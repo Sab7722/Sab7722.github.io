@@ -262,6 +262,9 @@
   }
 
   function onPointer(e) {
+    try {
+      if (typeof window.__laUnlockAudio === "function") window.__laUnlockAudio();
+    } catch {}
     const el =
       (e.target && e.target.closest && e.target.closest("button, [role=button], .title-menu")) ||
       null;
@@ -335,6 +338,9 @@
     if (down && s && (s.screen === "home" || (!s.play && (s.cine | 0) < 0))) {
       if (e.code === "Enter" || e.code === "Space") {
         e.preventDefault();
+        try {
+          if (typeof window.__laUnlockAudio === "function") window.__laUnlockAudio();
+        } catch {}
         startPlay(false);
         return;
       }
