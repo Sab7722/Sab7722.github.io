@@ -7,12 +7,14 @@ Current frozen save / rollback: **2026-09-14 (stay).**
 - Bundles: `index-out-stay.js`, `lunar-game-stay.js`
 - Do not overwrite `stay.html` / `*stay.js`.
 
-## Latest play (pad collider fix)
+## Latest play (mill approach + E inspect)
 
-- GitHub: **https://sab7722.github.io/solid.html**
-- Console: `LA_BUILD 20260914_SOLID`
-- Bundles: `index-out-solid.js`, `lunar-game-solid.js`
-- `footBlock` only: sM power unit (10.5,-9), oM extra solar pair OBB, NM shop crate. habBlock untouched.
+- GitHub: **https://sab7722.github.io/glaze.html**
+- Console: `LA_BUILD 20260914_GLAZE`
+- Bundles: `index-out-glaze.js`, `lunar-game-glaze.js`
+- `footBlock` only: removed 8 meshless mill-pad ghost circles that blocked mill approach. Mill body, kiln, hopper E, solar solids, habBlock untouched.
+
+Previous play (pad collider): **https://sab7722.github.io/solid.html** `LA_BUILD 20260914_SOLID`.
 
 Helmet lamp still intentionally unfixed.
 
@@ -39,6 +41,7 @@ Charging **works**. It is passive proximity, not an E button.
 9. Helmet lamp (intentionally unfixed)
 
 Older saves (do not overwrite):
+- https://sab7722.github.io/solid.html — `LA_BUILD 20260914_SOLID` (solar/prop colliders)
 - https://sab7722.github.io/bag.html — `LA_BUILD 20260913_BAG` (same game as STAY)
 - https://sab7722.github.io/mouth.html — `LA_BUILD 20260912_WIRE`
 - https://sab7722.github.io/eve.html — `LA_BUILD 20260911_EVE`
