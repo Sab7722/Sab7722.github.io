@@ -1,11 +1,34 @@
 # Lunar Ascent — KEEP HERE
 
-Current frozen save: 2026-09-13 afternoon (BAG freeze until tomorrow).
+Current frozen save: **2026-09-14 evening (until tomorrow).**
 
-- GitHub (use this): https://sab7722.github.io/stay.html
+- GitHub (use this): **https://sab7722.github.io/stay.html**
 - Console: `LA_BUILD 20260913_STAY`
 - Bundles: `index-out-stay.js`, `lunar-game-stay.js`
-- Identical to verified BAG: mill sleeper, EVA hop ~2 m, mouth disk gone + mouth router, alcove frost bags (`!ua()` pack-check bypass), Pegasus still required on far mare. Helmet lamp not changed.
+- Do not overwrite `stay.html` / `*stay.js`.
+
+Game unchanged tonight. Helmet lamp still intentionally unfixed.
+
+## Tonight’s diagnosis (Mass Driver charge)
+
+Charging **works**. It is passive proximity, not an E button.
+
+- Variable: `mdCharge`
+- Tick: `FI()` useFrame: within 7 m of `wI = (-18, 16)` → `mdCharge += min(dt, 0.05) * 0.22`
+- Launch refuse: `launchMd()` if `mdCharge < 0.35` → `rails undercharged — stay at the driver`
+- “Charge the rails” is the **undercharged fire label**. Pressing E launches (and fails). Stand still until it becomes `Launch — may fall short`.
+- Live stand-still at the cab reached **0.354** with no injected charge (~67 s headless; ~2 s at 60 fps).
+
+## Still open tomorrow
+
+1. Sample bag live 3/3 (code already in STAY; T4 + T32 confirmed; need one more valid run)
+2. Mass driver end-to-end (now: wait in cab, do not E on “Charge the rails”)
+3. ScoutBot Test 3
+4. Lab 3/3
+5. Rim-scar 3/3
+6. Optimus voice
+7. General audio
+8. Helmet lamp (intentionally unfixed)
 
 Older saves (do not overwrite):
 - https://sab7722.github.io/bag.html — `LA_BUILD 20260913_BAG` (same game as STAY)
