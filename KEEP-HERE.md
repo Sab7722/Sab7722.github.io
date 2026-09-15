@@ -7,46 +7,38 @@ Current frozen save / rollback: **2026-09-14 (stay).**
 - Bundles: `index-out-stay.js`, `lunar-game-stay.js`
 - Do not overwrite `stay.html` / `*stay.js`.
 
-## Latest play (Optimus E + look + voice)
+## Latest play (audio + readable lighting)
 
-- GitHub: **https://sab7722.github.io/prime.html**
-- Console: `LA_BUILD 20260914_PRIME`
-- Bundles: `index-out-prime.js`, `lunar-game-prime.js`
-- From rover: Scout E-send-to-mill, tunnel, MD apron still present.
-- Optimus only: E at ~2.15 m (closer than mill/Scout) shows **Ask Optimus** and assigns a walk 3/3. TTS `speak()` after cancel (50 ms + resume). Visual: thicker torso, shoulders, chest plate, visor glow. Same invisible hitbox `.95×2.15×.72`.
+- GitHub: **https://sab7722.github.io/hear.html**
+- Console: `LA_BUILD 20260914_HEAR`
+- Bundles: `index-out-hear.js`, `lunar-game-hear.js`
+- From prime: Optimus E, Scout send, tunnel, MD apron still present.
+- Audio: click-unlock now starts the pending bed (title was racing a null AudioContext). EVA bed 0.14 (was 0.02). Hab/work, EVA, rover/explore beds follow hatch/vehicle. Storm on foot. Helmet lamp **unchanged**.
+- Lighting: night ambient floor 0.34, hemi 0.42, sun floor 0.28, hab fill 0.2, exposure 1.32. Not the lamp.
 
-Previous play (Scout): **https://sab7722.github.io/rover.html** `LA_BUILD 20260914_ROVER`.
+Previous play (Optimus): **https://sab7722.github.io/prime.html** `LA_BUILD 20260914_PRIME`.
 
 Helmet lamp still intentionally unfixed.
 
-## Tonight’s diagnosis (Optimus)
+## Tonight’s diagnosis (audio + dark)
 
-Oz parks on the mill pad. Mill’s invisible `3.6×3.6` interact box stole the HUD; E at 2.5 m still hit mill/Scout if the prompt won first. Chrome drops `speechSynthesis.cancel()` + `speak()` in the same tick → silent in play. Mesh was a thin stacked-cylinder stick.
-
-Fix: closer-than-mill/Scout opt volume (2.8 m) for E + HUD; delayed TTS resume; `oX()` shoulders/chest/visor. Mill-S (closer to mill) unchanged. Scout send unchanged.
+Title `Me(title)` ran before `AudioContext` existed and locked the bed name, so unlock never started music. EVA wind gain was **0.02** (inaudible outside — the main play state). `Ce()` no-op’d if `x` was null and was never retried. Night sun was **0.014** with ambient ~0.16; hab interior fill **0.025** with lights off. SoftGL preview used a bright 0.55 branch so tests hid the darkness.
 
 ## Still open
 
 1. Habitat walls / corridors (separate problem — not this pass)
-2. Mass driver wait-to-charge on a live 60 fps client (headless rAF is starved; charge code unchanged)
+2. Mass driver wait-to-charge on a live 60 fps client
 3. Lab 3/3
 4. Rim-scar 3/3
-5. General audio
-6. Helmet lamp (intentionally unfixed)
+5. Helmet lamp (intentionally unfixed)
 
 Older saves (do not overwrite):
+- https://sab7722.github.io/prime.html — `LA_BUILD 20260914_PRIME` (Optimus E)
 - https://sab7722.github.io/rover.html — `LA_BUILD 20260914_ROVER` (Scout send)
-- https://sab7722.github.io/void.html — `LA_BUILD 20260914_VOID` (tunnel enter/exit)
-- https://sab7722.github.io/md.html — `LA_BUILD 20260914_MD` (MD apron sat load)
-- https://sab7722.github.io/glaze.html — `LA_BUILD 20260914_GLAZE` (mill-pad ghosts)
-- https://sab7722.github.io/solid.html — `LA_BUILD 20260914_SOLID` (solar/prop colliders)
-- https://sab7722.github.io/bag.html — `LA_BUILD 20260913_BAG` (same game as STAY)
-- https://sab7722.github.io/mouth.html — `LA_BUILD 20260912_WIRE`
-- https://sab7722.github.io/eve.html — `LA_BUILD 20260911_EVE`
-- https://sab7722.github.io/jump.html — `LA_BUILD 20260911_JUMP`
-- https://sab7722.github.io/sleeper.html — `LA_BUILD 20260911_SLEEPER`
-- https://sab7722.github.io/keep.html — `LA_BUILD 20260907_KEEP`
-- https://sab7722.github.io/saved.html — `LA_BUILD 20260906_SAVED`
+- https://sab7722.github.io/void.html — `LA_BUILD 20260914_VOID` (tunnel)
+- https://sab7722.github.io/md.html — `LA_BUILD 20260914_MD`
+- https://sab7722.github.io/glaze.html — `LA_BUILD 20260914_GLAZE`
+- https://sab7722.github.io/stay.html — `LA_BUILD 20260913_STAY`
 - grok.me original: https://reef-brook-charm-cinder.grok.me/
 
 Do not delete this repo. “Save it” means a new unique HTML + isolated JS copies, then push.
