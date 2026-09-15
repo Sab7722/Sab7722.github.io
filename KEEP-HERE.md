@@ -7,16 +7,16 @@ Current frozen save / rollback: **2026-09-14 (stay).**
 - Bundles: `index-out-stay.js`, `lunar-game-stay.js`
 - Do not overwrite `stay.html` / `*stay.js`.
 
-## Latest play (LTV look + Earth sky)
+## Latest play (New Game intro)
 
-- GitHub: **https://sab7722.github.io/ride.html**
-- Console: `LA_BUILD 20260914_RIDE`
-- Bundles: `index-out-ride.js`, `lunar-game-ride.js`
-- From lens: LEMS, hydro view, compass, audio, Optimus, Scout, tunnel, MD still present.
-- LTV: look yaw is independent of hull — mouse left/right works; enter/drive/exit intact. Cab camera a bit higher.
-- Earth is camera-locked in the sky (~60° up), not a ball sitting over the ridges. Helmet lamp **unchanged**.
+- GitHub: **https://sab7722.github.io/intro.html**
+- Console: `LA_BUILD 20260914_INTRO`
+- Bundles: `index-out-intro.js`, `lunar-game-intro.js`, `lunar-boot-intro.js`
+- New Game plays the cine every fresh start. Continue/Load still skips. Escape skip still works.
+- From ride: LTV look, Earth sky, LEMS, hydro view, compass, audio, Optimus, Scout, tunnel, MD still present.
+- Helmet lamp **unchanged**. stay.html **untouched**.
 
-Previous play: **https://sab7722.github.io/lens.html** `LA_BUILD 20260914_LENS`.
+Previous play: **https://sab7722.github.io/ride.html** `LA_BUILD 20260914_RIDE`.
 
 Helmet lamp still intentionally unfixed.
 
