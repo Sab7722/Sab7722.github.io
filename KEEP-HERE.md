@@ -6,9 +6,9 @@ Current frozen save / rollback: **2026-09-14 (stay).**
 - Console: `LA_BUILD 20260913_STAY`
 - Do not overwrite `stay.html` / `*stay.js`.
 
-## Latest play (sticky canvas after Start/Continue)
+## Latest play (one soft WebGL create)
 
-- GitHub: **https://sab7722.github.io/stick.html**
-- Console: `LA_BUILD 20260915_STICK`
-- Bundles: `index-out-stick.js` ↔ `lunar-game-stick.js`
-- After play/intro, sticky `#app` `setSize` (~36 rAF) so R3F size-store cannot snap the buffer back to 300×150. Skip `setSize` w/h < 2. Title `#app-first` kept. stay untouched.
+- GitHub: **https://sab7722.github.io/lite.html**
+- Console: `LA_BUILD 20260915_LITE`
+- Bundles: `index-out-lite.js` ↔ `lunar-game-lite.js`
+- First (and only) WebGL create is soft: dpr=1, no AA, no shadows, `powerPreference:default`. Context-lost: preventDefault, dispose, remount once — never loop. Sticky `#app` setSize kept. stay untouched.
