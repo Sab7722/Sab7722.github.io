@@ -6,10 +6,10 @@ Current frozen save / rollback: **2026-09-14 (stay).**
 - Console: `LA_BUILD 20260913_STAY`
 - Do not overwrite `stay.html` / `*stay.js`.
 
-## Latest play (bag YI, no remount)
+## Latest play (Start/Continue fireReact)
 
-- GitHub: **https://sab7722.github.io/soft.html**
-- Console: `LA_BUILD 20260915_SOFT`
-- Bundles: `index-out-soft.js` ↔ `lunar-game-soft.js` (bag rename-only)
-- Boot: `lunar-boot-soft.js` Erase = `fireReact` only (not `startPlay(true)`).
-- No `key:gen` / no enter-play remount. stay / stick / lite untouched.
+- GitHub: **https://sab7722.github.io/cont.html**
+- Console: `LA_BUILD 20260915_CONT`
+- Game pair kept: `index-out-soft.js` ↔ `lunar-game-soft.js`
+- Boot: `lunar-boot-cont.js` — Start/Continue/Erase all `fireReact` (no `startPlay(false)` hijack)
+- stay / soft.html untouched.
