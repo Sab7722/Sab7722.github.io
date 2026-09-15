@@ -7,36 +7,36 @@ Current frozen save / rollback: **2026-09-14 (stay).**
 - Bundles: `index-out-stay.js`, `lunar-game-stay.js`
 - Do not overwrite `stay.html` / `*stay.js`.
 
-## Latest play (tunnel enter/exit + alcove bag)
+## Latest play (ScoutBot send + readable rover)
 
-- GitHub: **https://sab7722.github.io/void.html**
-- Console: `LA_BUILD 20260914_VOID`
-- Bundles: `index-out-void.js`, `lunar-game-void.js`
-- From md: mill-pad ghosts still gone; MD apron sat-load still works.
-- Lava-tube only: mouth open `t<0.045` (north front enter/exit). Nearest-side shell blocks side glitch (no `footBlock` disk at `[46,-44,2.15]`). Width matches visual `r≈2.45`. Roof cap `floor+2.18` (no sky pop-to-mare). Joint overlap `s+1.85`. Alcove `useAct(sample)` bags void 3/3; false Pegasus skipped within 16 m of Sn. `tubeBlock` (habitat connectors) untouched.
+- GitHub: **https://sab7722.github.io/rover.html**
+- Console: `LA_BUILD 20260914_ROVER`
+- Bundles: `index-out-rover.js`, `lunar-game-rover.js`
+- From void: tunnel mouth/roof/alcove bag and MD apron sat-load still present.
+- Scout only: E at the dock sends to mill (no Chart dest required). HUD `Send scout to mill`. Optional Chart in pause (M) still picks another mark. Rover visual: chassis, solar wing, dish, mast cam, 6 wheels. Same invisible hitbox `1.2×1.35×1.25`.
 
-Previous play (MD sat load): **https://sab7722.github.io/md.html** `LA_BUILD 20260914_MD`.
+Previous play (tunnel): **https://sab7722.github.io/void.html** `LA_BUILD 20260914_VOID`.
 
 Helmet lamp still intentionally unfixed.
 
-## Tonight’s diagnosis (tunnel)
+## Tonight’s diagnosis (ScoutBot)
 
-Stay mouth `w=4.6` treated (50,-44) as inside and slid you onto the centerline (side glitch). Collision width 3.2–4.6 vs visual cylinder `r=2.45` = see-through. `lavaWall` was keep-in only (`d>width` no-op) so once outside you could walk through walls / could not reliably exit. No roof: shallow mouth/sky floor could pop to mare. Alcove bag code (`Ms(void)`) already worked; false Pegasus fired when `hypot>110 && !ua()` near Sn.
+Stay: looking at Scout showed **Read scout log**. E without a Chart dest did **not** send — job `Open the Map. Tap a place…`. Chart lives in pause (M), so the advertised Map step was buried. Model was a low silver crate on 4 wheels.
 
-Fix: narrower `oa` widths, open mouth, nearest-side shell (keep-in inside / keep-out outside), roof clamp, seam overlap, Pegasus guard `hypot(Sn)>16`.
+Fix: `sendScoutFromAct` defaults to mill; CI `use`/`send` labels `Send scout to mill` / `Send scout`; `bM()` visual only.
 
 ## Still open
 
 1. Habitat walls / corridors (separate problem — not this pass)
 2. Mass driver wait-to-charge on a live 60 fps client (headless rAF is starved; charge code unchanged)
-3. ScoutBot Test 3
-4. Lab 3/3
-5. Rim-scar 3/3
-6. Optimus voice
-7. General audio
-8. Helmet lamp (intentionally unfixed)
+3. Lab 3/3
+4. Rim-scar 3/3
+5. Optimus voice
+6. General audio
+7. Helmet lamp (intentionally unfixed)
 
 Older saves (do not overwrite):
+- https://sab7722.github.io/void.html — `LA_BUILD 20260914_VOID` (tunnel enter/exit)
 - https://sab7722.github.io/md.html — `LA_BUILD 20260914_MD` (MD apron sat load)
 - https://sab7722.github.io/glaze.html — `LA_BUILD 20260914_GLAZE` (mill-pad ghosts)
 - https://sab7722.github.io/solid.html — `LA_BUILD 20260914_SOLID` (solar/prop colliders)
