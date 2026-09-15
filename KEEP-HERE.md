@@ -7,16 +7,16 @@ Current frozen save / rollback: **2026-09-14 (stay).**
 - Bundles: `index-out-stay.js`, `lunar-game-stay.js`
 - Do not overwrite `stay.html` / `*stay.js`.
 
-## Latest play (habitat walls)
+## Latest play (tunnel + alcove bag)
 
-- GitHub: **https://sab7722.github.io/ring.html**
-- Console: `LA_BUILD 20260915_RING`
-- Bundles: `index-out-ring.js`, `lunar-game-ring.js` (matched pair)
-- Indoor `setPos` now runs `habBlock` (was a no-op bypass). Corridor wings / radials / hull / core solid; doors still pass; hatch egress still walks south.
-- No footBlock rewrite. MD / tunnel / mill not reopened.
+- GitHub: **https://sab7722.github.io/bore.html**
+- Console: `LA_BUILD 20260915_BORE`
+- Bundles: `index-out-bore.js`, `lunar-game-bore.js` (matched pair)
+- Front enter / side blocked / walk-through / exit / roof / visual DoubleSide overlap / alcove E bags frost 3/3 (no Pegasus).
+- No footBlock mouth disk. tubeBlock / habBlock / MD / mill / eat not reopened.
 - stay.html **untouched**.
 
-Previous play: **https://sab7722.github.io/meal.html** `LA_BUILD 20260915_MEAL`.
+Previous play: **https://sab7722.github.io/ring.html** `LA_BUILD 20260915_RING`.
 
 Helmet lamp still intentionally unfixed.
 
@@ -28,8 +28,8 @@ Helmet lamp still intentionally unfixed.
 4. Helmet lamp (intentionally unfixed)
 
 Older saves (do not overwrite):
+- https://sab7722.github.io/ring.html — `LA_BUILD 20260915_RING`
 - https://sab7722.github.io/meal.html — `LA_BUILD 20260915_MEAL`
 - https://sab7722.github.io/pack.html — `LA_BUILD 20260915_PACK`
-- https://sab7722.github.io/boot.html — `LA_BUILD 20260915_BOOT`
 - https://sab7722.github.io/void.html — `LA_BUILD 20260914_VOID`
 - https://sab7722.github.io/stay.html — `LA_BUILD 20260913_STAY`
