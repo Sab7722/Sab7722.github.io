@@ -228,13 +228,7 @@
       return true;
     }
     if (l === "new game") {
-      const g = st();
-      const has = !!(g && (g.started || (g.found && g.found.length)));
-      if (has) {
-        fireReact(el);
-        return true;
-      }
-      startPlay(true);
+      fireReact(el);
       return true;
     }
     if (l === "erase and start") {
@@ -344,7 +338,16 @@
         try {
           if (typeof window.__laUnlockAudio === "function") window.__laUnlockAudio();
         } catch {}
-        startPlay(false);
+        const btn = [...document.querySelectorAll("button")].find((x) =>
+          /^(Start|Continue)$/i.test((x.innerText || "").trim())
+        );
+        if (btn) {
+          const now = performance.now();
+          if (!(lastStartAt > 0 && now - lastStartAt < 350)) {
+            lastStartAt = now;
+            fireReact(btn);
+          }
+        }
         return;
       }
     }
