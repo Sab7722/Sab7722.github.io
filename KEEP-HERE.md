@@ -7,39 +7,37 @@ Current frozen save / rollback: **2026-09-14 (stay).**
 - Bundles: `index-out-stay.js`, `lunar-game-stay.js`
 - Do not overwrite `stay.html` / `*stay.js`.
 
-## Latest play (mass-driver sat load + second fire)
+## Latest play (tunnel enter/exit + alcove bag)
 
-- GitHub: **https://sab7722.github.io/md.html**
-- Console: `LA_BUILD 20260914_MD`
-- Bundles: `index-out-md.js`, `lunar-game-md.js`
-- From glaze: mill-pad ghosts still gone.
-- `se()` only, plus `oe()` sat-hide while holding sat/slug or `mdLoaded`: sat crates on the breech apron no longer steal E. Load on apron ~2–4 m from Qn=(-18,16). After launch, pick up another sat → load → wait (do not E “Charge the rails”) → fire again. Abort bead still unloads. Cab carve, charge threshold 0.35, `launchMd` reset, mill/kiln/solar untouched.
+- GitHub: **https://sab7722.github.io/void.html**
+- Console: `LA_BUILD 20260914_VOID`
+- Bundles: `index-out-void.js`, `lunar-game-void.js`
+- From md: mill-pad ghosts still gone; MD apron sat-load still works.
+- Lava-tube only: mouth open `t<0.045` (north front enter/exit). Nearest-side shell blocks side glitch (no `footBlock` disk at `[46,-44,2.15]`). Width matches visual `r≈2.45`. Roof cap `floor+2.18` (no sky pop-to-mare). Joint overlap `s+1.85`. Alcove `useAct(sample)` bags void 3/3; false Pegasus skipped within 16 m of Sn. `tubeBlock` (habitat connectors) untouched.
 
-Previous play (mill approach): **https://sab7722.github.io/glaze.html** `LA_BUILD 20260914_GLAZE`.
+Previous play (MD sat load): **https://sab7722.github.io/md.html** `LA_BUILD 20260914_MD`.
 
 Helmet lamp still intentionally unfixed.
 
-## Tonight’s diagnosis (Mass Driver load + second fire)
+## Tonight’s diagnosis (tunnel)
 
-Not a `launchMd` reset bug. `launchMd` already sets `fireTick++`, `mdLoaded=false`, `mdCharge=0`.
+Stay mouth `w=4.6` treated (50,-44) as inside and slid you onto the centerline (side glitch). Collision width 3.2–4.6 vs visual cylinder `r=2.45` = see-through. `lavaWall` was keep-in only (`d>width` no-op) so once outside you could walk through walls / could not reliably exit. No roof: shallow mouth/sky floor could pop to mare. Alcove bag code (`Ms(void)`) already worked; false Pegasus fired when `hypot>110 && !ua()` near Sn.
 
-Load fail + “second fire does nothing” were the same steal: sat crates at ~1.3 m from the apron stand win `oe()` (cone 0.08, hypot −2.1) so E re-picks a sat. Holding sat then E on fire **re-loads** instead of launching.
-
-Fix: on the apron (`hypot(Qn)<6`), E loads if holding sat/slug and fires if `mdLoaded`; sat/slug targets are hidden in `oe()` while holding or loaded. Charge is still passive 7 m. Do not E “Charge the rails”.
+Fix: narrower `oa` widths, open mouth, nearest-side shell (keep-in inside / keep-out outside), roof clamp, seam overlap, Pegasus guard `hypot(Sn)>16`.
 
 ## Still open
 
 1. Habitat walls / corridors (separate problem — not this pass)
-2. Sample bag live 3/3 (code already in STAY; T4 + T32 confirmed; need one more valid run)
-3. Mass driver wait-to-charge on a live 60 fps client (headless rAF is starved; charge code unchanged)
-4. ScoutBot Test 3
-5. Lab 3/3
-6. Rim-scar 3/3
-7. Optimus voice
-8. General audio
-9. Helmet lamp (intentionally unfixed)
+2. Mass driver wait-to-charge on a live 60 fps client (headless rAF is starved; charge code unchanged)
+3. ScoutBot Test 3
+4. Lab 3/3
+5. Rim-scar 3/3
+6. Optimus voice
+7. General audio
+8. Helmet lamp (intentionally unfixed)
 
 Older saves (do not overwrite):
+- https://sab7722.github.io/md.html — `LA_BUILD 20260914_MD` (MD apron sat load)
 - https://sab7722.github.io/glaze.html — `LA_BUILD 20260914_GLAZE` (mill-pad ghosts)
 - https://sab7722.github.io/solid.html — `LA_BUILD 20260914_SOLID` (solar/prop colliders)
 - https://sab7722.github.io/bag.html — `LA_BUILD 20260913_BAG` (same game as STAY)
