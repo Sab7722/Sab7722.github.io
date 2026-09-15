@@ -7,32 +7,31 @@ Current frozen save / rollback: **2026-09-14 (stay).**
 - Bundles: `index-out-stay.js`, `lunar-game-stay.js`
 - Do not overwrite `stay.html` / `*stay.js`.
 
-## Latest play (mill approach + E inspect)
+## Latest play (mass-driver sat load + second fire)
 
-- GitHub: **https://sab7722.github.io/glaze.html**
-- Console: `LA_BUILD 20260914_GLAZE`
-- Bundles: `index-out-glaze.js`, `lunar-game-glaze.js`
-- `footBlock` only: removed 8 meshless mill-pad ghost circles that blocked mill approach. Mill body, kiln, hopper E, solar solids, habBlock untouched.
+- GitHub: **https://sab7722.github.io/md.html**
+- Console: `LA_BUILD 20260914_MD`
+- Bundles: `index-out-md.js`, `lunar-game-md.js`
+- From glaze: mill-pad ghosts still gone.
+- `se()` only, plus `oe()` sat-hide while holding sat/slug or `mdLoaded`: sat crates on the breech apron no longer steal E. Load on apron ~2–4 m from Qn=(-18,16). After launch, pick up another sat → load → wait (do not E “Charge the rails”) → fire again. Abort bead still unloads. Cab carve, charge threshold 0.35, `launchMd` reset, mill/kiln/solar untouched.
 
-Previous play (pad collider): **https://sab7722.github.io/solid.html** `LA_BUILD 20260914_SOLID`.
+Previous play (mill approach): **https://sab7722.github.io/glaze.html** `LA_BUILD 20260914_GLAZE`.
 
 Helmet lamp still intentionally unfixed.
 
-## Tonight’s diagnosis (Mass Driver charge)
+## Tonight’s diagnosis (Mass Driver load + second fire)
 
-Charging **works**. It is passive proximity, not an E button.
+Not a `launchMd` reset bug. `launchMd` already sets `fireTick++`, `mdLoaded=false`, `mdCharge=0`.
 
-- Variable: `mdCharge`
-- Tick: `FI()` useFrame: within 7 m of `wI = (-18, 16)` → `mdCharge += min(dt, 0.05) * 0.22`
-- Launch refuse: `launchMd()` if `mdCharge < 0.35` → `rails undercharged — stay at the driver`
-- “Charge the rails” is the **undercharged fire label**. Pressing E launches (and fails). Stand still until it becomes `Launch — may fall short`.
-- Live stand-still at the cab reached **0.354** with no injected charge (~67 s headless; ~2 s at 60 fps).
+Load fail + “second fire does nothing” were the same steal: sat crates at ~1.3 m from the apron stand win `oe()` (cone 0.08, hypot −2.1) so E re-picks a sat. Holding sat then E on fire **re-loads** instead of launching.
+
+Fix: on the apron (`hypot(Qn)<6`), E loads if holding sat/slug and fires if `mdLoaded`; sat/slug targets are hidden in `oe()` while holding or loaded. Charge is still passive 7 m. Do not E “Charge the rails”.
 
 ## Still open
 
 1. Habitat walls / corridors (separate problem — not this pass)
 2. Sample bag live 3/3 (code already in STAY; T4 + T32 confirmed; need one more valid run)
-3. Mass driver end-to-end (wait in cab, do not E on “Charge the rails”)
+3. Mass driver wait-to-charge on a live 60 fps client (headless rAF is starved; charge code unchanged)
 4. ScoutBot Test 3
 5. Lab 3/3
 6. Rim-scar 3/3
@@ -41,6 +40,7 @@ Charging **works**. It is passive proximity, not an E button.
 9. Helmet lamp (intentionally unfixed)
 
 Older saves (do not overwrite):
+- https://sab7722.github.io/glaze.html — `LA_BUILD 20260914_GLAZE` (mill-pad ghosts)
 - https://sab7722.github.io/solid.html — `LA_BUILD 20260914_SOLID` (solar/prop colliders)
 - https://sab7722.github.io/bag.html — `LA_BUILD 20260913_BAG` (same game as STAY)
 - https://sab7722.github.io/mouth.html — `LA_BUILD 20260912_WIRE`
