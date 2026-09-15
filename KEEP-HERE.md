@@ -7,22 +7,22 @@ Current frozen save / rollback: **2026-09-14 (stay).**
 - Bundles: `index-out-stay.js`, `lunar-game-stay.js`
 - Do not overwrite `stay.html` / `*stay.js`.
 
-## Latest play (New Game intro)
+## Latest play (Rook next-step hints)
 
-- GitHub: **https://sab7722.github.io/intro.html**
-- Console: `LA_BUILD 20260914_INTRO`
-- Bundles: `index-out-intro.js`, `lunar-game-intro.js`, `lunar-boot-intro.js`
-- New Game plays the cine every fresh start. Continue/Load still skips. Escape skip still works.
-- From ride: LTV look, Earth sky, LEMS, hydro view, compass, audio, Optimus, Scout, tunnel, MD still present.
+- GitHub: **https://sab7722.github.io/hint.html**
+- Console: `LA_BUILD 20260914_HINT`
+- Bundles: `index-out-hint.js`, `lunar-game-hint.js`, `lunar-boot-hint.js`, `lunar-talk-hint.js`
+- E on Rook (and “what next / stuck”) uses progress-aware `rookHint` so stuck states get a clear next step. Story lines in `Ji` are not rewritten.
+- From intro: New Game cine, LTV look, Earth sky, LEMS, hydro view, compass, audio, Optimus, Scout, tunnel, MD still present.
 - Helmet lamp **unchanged**. stay.html **untouched**.
 
-Previous play: **https://sab7722.github.io/ride.html** `LA_BUILD 20260914_RIDE`.
+Previous play: **https://sab7722.github.io/intro.html** `LA_BUILD 20260914_INTRO`.
 
 Helmet lamp still intentionally unfixed.
 
 ## Tonight’s diagnosis
 
-LTV look yaw was glued to hull (`p += e.yaw-hy0`), so steer ate sideways look; `getYaw()` even reported hull yaw. Earth lived at 920 m with 37° elevation — walking gave parallax, so it read as a ball over the ground.
+E-talk used `Ji(found, solar, outside)` — flavor keyed off `found`, so the same sentence looped. Progress-aware `rookHint(state, "stuck")` already existed but never ran on E, and `lunar-talk.js` intercepted typed “what next” before `Cu`.
 
 ## Still open
 
@@ -33,6 +33,8 @@ LTV look yaw was glued to hull (`p += e.yaw-hy0`), so steer ate sideways look; `
 5. Helmet lamp (intentionally unfixed)
 
 Older saves (do not overwrite):
+- https://sab7722.github.io/intro.html — `LA_BUILD 20260914_INTRO`
+- https://sab7722.github.io/ride.html — `LA_BUILD 20260914_RIDE`
 - https://sab7722.github.io/lens.html — `LA_BUILD 20260914_LENS`
 - https://sab7722.github.io/hear.html — `LA_BUILD 20260914_HEAR`
 - https://sab7722.github.io/prime.html — `LA_BUILD 20260914_PRIME`
