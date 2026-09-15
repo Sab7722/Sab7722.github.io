@@ -7,15 +7,16 @@ Current frozen save / rollback: **2026-09-14 (stay).**
 - Bundles: `index-out-stay.js`, `lunar-game-stay.js`
 - Do not overwrite `stay.html` / `*stay.js`.
 
-## Latest play (merged pack)
+## Latest play (Deck-2 eat)
 
-- GitHub: **https://sab7722.github.io/pack.html**
-- Console: `LA_BUILD 20260915_PACK`
-- Bundles: `index-out-pack.js`, `lunar-game-pack.js` (matched pair, no ESM `?v=`)
-- Brings forward: void tunnel+bag, md apron load/second fire, glaze mill approach, solid solar/shop, hint Rook next-step.
+- GitHub: **https://sab7722.github.io/meal.html**
+- Console: `LA_BUILD 20260915_MEAL`
+- Bundles: `index-out-meal.js`, `lunar-game-meal.js` (matched pair)
+- Eat gated to Deck 2; pressE at the galley table eats; Deck-1 hatch E is airlock only (no through-floor steal).
+- Pack merge kept: tunnel+bag, MD apron, mill, solar/shop, Rook next-step.
 - Helmet lamp not reopened. stay.html **untouched**.
 
-Previous play: **https://sab7722.github.io/boot.html** `LA_BUILD 20260915_BOOT`.
+Previous play: **https://sab7722.github.io/pack.html** `LA_BUILD 20260915_PACK`.
 
 Helmet lamp still intentionally unfixed.
 
@@ -28,6 +29,7 @@ Helmet lamp still intentionally unfixed.
 5. Helmet lamp (intentionally unfixed)
 
 Older saves (do not overwrite):
+- https://sab7722.github.io/pack.html — `LA_BUILD 20260915_PACK`
 - https://sab7722.github.io/boot.html — `LA_BUILD 20260915_BOOT`
 - https://sab7722.github.io/void.html — `LA_BUILD 20260914_VOID`
 - https://sab7722.github.io/md.html — `LA_BUILD 20260914_MD`
@@ -35,6 +37,5 @@ Older saves (do not overwrite):
 - https://sab7722.github.io/solid.html — `LA_BUILD 20260914_SOLID`
 - https://sab7722.github.io/hint.html — `LA_BUILD 20260914_HINT`
 - https://sab7722.github.io/stay.html — `LA_BUILD 20260913_STAY`
-- grok.me original: https://reef-brook-charm-cinder.grok.me/
 
 Do not delete this repo. “Save it” means a new unique HTML + isolated JS copies, then push.
