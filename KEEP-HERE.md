@@ -7,23 +7,22 @@ Current frozen save / rollback: **2026-09-14 (stay).**
 - Bundles: `index-out-stay.js`, `lunar-game-stay.js`
 - Do not overwrite `stay.html` / `*stay.js`.
 
-## Latest play (LEMS + hydro view + compass)
+## Latest play (LTV look + Earth sky)
 
-- GitHub: **https://sab7722.github.io/lens.html**
-- Console: `LA_BUILD 20260914_LENS`
-- Bundles: `index-out-lens.js`, `lunar-game-lens.js`
-- From hear: audio beds, Optimus E, Scout send, tunnel, MD apron still present.
-- LEMS: E at the SE peg (red bead) works 3/3 — hypot before rock-steal, wider look cone, prompt stays after baseline.
-- Hydro: first-person body hidden inside so the suit doesn’t fill the plants room. EVA/third-person body unchanged.
-- Compass stays top-center; job line drops below the tape. Helmet lamp **unchanged**.
+- GitHub: **https://sab7722.github.io/ride.html**
+- Console: `LA_BUILD 20260914_RIDE`
+- Bundles: `index-out-ride.js`, `lunar-game-ride.js`
+- From lens: LEMS, hydro view, compass, audio, Optimus, Scout, tunnel, MD still present.
+- LTV: look yaw is independent of hull — mouse left/right works; enter/drive/exit intact. Cab camera a bit higher.
+- Earth is camera-locked in the sky (~60° up), not a ball sitting over the ridges. Helmet lamp **unchanged**.
 
-Previous play (audio): **https://sab7722.github.io/hear.html** `LA_BUILD 20260914_HEAR`.
+Previous play: **https://sab7722.github.io/lens.html** `LA_BUILD 20260914_LENS`.
 
 Helmet lamp still intentionally unfixed.
 
 ## Tonight’s diagnosis
 
-LEMS look cone was **0.08** (with pickup rocks) and E ran prompt-first, so nearby “Pick up” stole the peg. After `lems-base` the HUD wiped Use LEMS. FP player body stayed visible indoors (`visible=not-vehicle`, `tp` flag unused) and blocked hydro. Job HUD `z-70` at ~5 rem overlapped the unused-`drop` compass at 0.85 rem.
+LTV look yaw was glued to hull (`p += e.yaw-hy0`), so steer ate sideways look; `getYaw()` even reported hull yaw. Earth lived at 920 m with 37° elevation — walking gave parallax, so it read as a ball over the ground.
 
 ## Still open
 
@@ -34,10 +33,9 @@ LEMS look cone was **0.08** (with pickup rocks) and E ran prompt-first, so nearb
 5. Helmet lamp (intentionally unfixed)
 
 Older saves (do not overwrite):
+- https://sab7722.github.io/lens.html — `LA_BUILD 20260914_LENS`
 - https://sab7722.github.io/hear.html — `LA_BUILD 20260914_HEAR`
 - https://sab7722.github.io/prime.html — `LA_BUILD 20260914_PRIME`
-- https://sab7722.github.io/rover.html — `LA_BUILD 20260914_ROVER`
-- https://sab7722.github.io/void.html — `LA_BUILD 20260914_VOID`
 - https://sab7722.github.io/stay.html — `LA_BUILD 20260913_STAY`
 - grok.me original: https://reef-brook-charm-cinder.grok.me/
 
