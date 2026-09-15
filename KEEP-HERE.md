@@ -7,23 +7,17 @@ Current frozen save / rollback: **2026-09-14 (stay).**
 - Bundles: `index-out-stay.js`, `lunar-game-stay.js`
 - Do not overwrite `stay.html` / `*stay.js`.
 
-## Latest play (Start / New Game boot)
+## Latest play (merged pack)
 
-- GitHub: **https://sab7722.github.io/boot.html**
-- Console: `LA_BUILD 20260915_BOOT`
-- Bundles: `index-out-boot.js`, `lunar-game-boot.js` (matched pair, one React, one THREE)
-- Stay freeze imported `index-out-bag.js` while the page loaded `index-out-stay.js` — two Reacts, `useCallback` of null, Start soft-lock.
-- Boot is a unique copy of the void pair with the same stamp and **no `?v=` on ESM modules** (query on the entry script was a second React vs the bare `from"./index-out-*.js"` import). Unique filenames cache-bust. No bag leftovers.
-- Start / New Game enter play. Walls, MD, tunnel, mill, eat, audio, helmet untouched.
-- stay.html **untouched**.
+- GitHub: **https://sab7722.github.io/pack.html**
+- Console: `LA_BUILD 20260915_PACK`
+- Bundles: `index-out-pack.js`, `lunar-game-pack.js` (matched pair, no ESM `?v=`)
+- Brings forward: void tunnel+bag, md apron load/second fire, glaze mill approach, solid solar/shop, hint Rook next-step.
+- Helmet lamp not reopened. stay.html **untouched**.
 
-Previous play: **https://sab7722.github.io/void.html** `LA_BUILD 20260914_VOID`.
+Previous play: **https://sab7722.github.io/boot.html** `LA_BUILD 20260915_BOOT`.
 
 Helmet lamp still intentionally unfixed.
-
-## Tonight’s diagnosis
-
-`lunar-game-stay.js` is a byte copy of `lunar-game-bag.js` and still `import`s `./index-out-bag.js`. stay.html also loads `index-out-stay.js`. Two vendor graphs = two Reacts. Cache-bust `?v=` on the module script made the same split even on later matched filenames.
 
 ## Still open
 
@@ -34,14 +28,12 @@ Helmet lamp still intentionally unfixed.
 5. Helmet lamp (intentionally unfixed)
 
 Older saves (do not overwrite):
+- https://sab7722.github.io/boot.html — `LA_BUILD 20260915_BOOT`
 - https://sab7722.github.io/void.html — `LA_BUILD 20260914_VOID`
-- https://sab7722.github.io/guide.html — `LA_BUILD 20260914_GUIDE`
+- https://sab7722.github.io/md.html — `LA_BUILD 20260914_MD`
+- https://sab7722.github.io/glaze.html — `LA_BUILD 20260914_GLAZE`
+- https://sab7722.github.io/solid.html — `LA_BUILD 20260914_SOLID`
 - https://sab7722.github.io/hint.html — `LA_BUILD 20260914_HINT`
-- https://sab7722.github.io/intro.html — `LA_BUILD 20260914_INTRO`
-- https://sab7722.github.io/ride.html — `LA_BUILD 20260914_RIDE`
-- https://sab7722.github.io/lens.html — `LA_BUILD 20260914_LENS`
-- https://sab7722.github.io/hear.html — `LA_BUILD 20260914_HEAR`
-- https://sab7722.github.io/prime.html — `LA_BUILD 20260914_PRIME`
 - https://sab7722.github.io/stay.html — `LA_BUILD 20260913_STAY`
 - grok.me original: https://reef-brook-charm-cinder.grok.me/
 
