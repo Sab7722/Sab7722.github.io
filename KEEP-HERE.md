@@ -7,23 +7,23 @@ Current frozen save / rollback: **2026-09-14 (stay).**
 - Bundles: `index-out-stay.js`, `lunar-game-stay.js`
 - Do not overwrite `stay.html` / `*stay.js`.
 
-## Latest play (ScoutBot send + readable rover)
+## Latest play (Optimus E + look + voice)
 
-- GitHub: **https://sab7722.github.io/rover.html**
-- Console: `LA_BUILD 20260914_ROVER`
-- Bundles: `index-out-rover.js`, `lunar-game-rover.js`
-- From void: tunnel mouth/roof/alcove bag and MD apron sat-load still present.
-- Scout only: E at the dock sends to mill (no Chart dest required). HUD `Send scout to mill`. Optional Chart in pause (M) still picks another mark. Rover visual: chassis, solar wing, dish, mast cam, 6 wheels. Same invisible hitbox `1.2×1.35×1.25`.
+- GitHub: **https://sab7722.github.io/prime.html**
+- Console: `LA_BUILD 20260914_PRIME`
+- Bundles: `index-out-prime.js`, `lunar-game-prime.js`
+- From rover: Scout E-send-to-mill, tunnel, MD apron still present.
+- Optimus only: E at ~2.15 m (closer than mill/Scout) shows **Ask Optimus** and assigns a walk 3/3. TTS `speak()` after cancel (50 ms + resume). Visual: thicker torso, shoulders, chest plate, visor glow. Same invisible hitbox `.95×2.15×.72`.
 
-Previous play (tunnel): **https://sab7722.github.io/void.html** `LA_BUILD 20260914_VOID`.
+Previous play (Scout): **https://sab7722.github.io/rover.html** `LA_BUILD 20260914_ROVER`.
 
 Helmet lamp still intentionally unfixed.
 
-## Tonight’s diagnosis (ScoutBot)
+## Tonight’s diagnosis (Optimus)
 
-Stay: looking at Scout showed **Read scout log**. E without a Chart dest did **not** send — job `Open the Map. Tap a place…`. Chart lives in pause (M), so the advertised Map step was buried. Model was a low silver crate on 4 wheels.
+Oz parks on the mill pad. Mill’s invisible `3.6×3.6` interact box stole the HUD; E at 2.5 m still hit mill/Scout if the prompt won first. Chrome drops `speechSynthesis.cancel()` + `speak()` in the same tick → silent in play. Mesh was a thin stacked-cylinder stick.
 
-Fix: `sendScoutFromAct` defaults to mill; CI `use`/`send` labels `Send scout to mill` / `Send scout`; `bM()` visual only.
+Fix: closer-than-mill/Scout opt volume (2.8 m) for E + HUD; delayed TTS resume; `oX()` shoulders/chest/visor. Mill-S (closer to mill) unchanged. Scout send unchanged.
 
 ## Still open
 
@@ -31,11 +31,11 @@ Fix: `sendScoutFromAct` defaults to mill; CI `use`/`send` labels `Send scout to 
 2. Mass driver wait-to-charge on a live 60 fps client (headless rAF is starved; charge code unchanged)
 3. Lab 3/3
 4. Rim-scar 3/3
-5. Optimus voice
-6. General audio
-7. Helmet lamp (intentionally unfixed)
+5. General audio
+6. Helmet lamp (intentionally unfixed)
 
 Older saves (do not overwrite):
+- https://sab7722.github.io/rover.html — `LA_BUILD 20260914_ROVER` (Scout send)
 - https://sab7722.github.io/void.html — `LA_BUILD 20260914_VOID` (tunnel enter/exit)
 - https://sab7722.github.io/md.html — `LA_BUILD 20260914_MD` (MD apron sat load)
 - https://sab7722.github.io/glaze.html — `LA_BUILD 20260914_GLAZE` (mill-pad ghosts)
